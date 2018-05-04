@@ -1,6 +1,6 @@
 #include "StringTable.h"
 
-int StringTable::insert(const std::string str)
+int StringTable::insert(const std::string& str)
 {
 	// Check if string exists in table
 	for (unsigned int i = 0; i < _strings.size(); ++i) {

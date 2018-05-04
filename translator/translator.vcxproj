@@ -116,9 +116,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="StringTable\StringTable.cpp" />
+    <ClCompile Include="SymbolTable\SymbolTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StringTable\StringTable.h" />
+    <ClInclude Include="SymbolTable\SymbolTable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
