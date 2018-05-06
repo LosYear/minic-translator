@@ -17,6 +17,12 @@ std::shared_ptr<MemoryOperand> SymbolTable::insert(const std::string & name)
 	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
 }
 
+std::shared_ptr<MemoryOperand> SymbolTable::alloc()
+{
+	_records.push_back(TableRecord());
+	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
+}
+
 const SymbolTable::TableRecord & SymbolTable::operator[](const int index) const
 {
 	return _records[index];

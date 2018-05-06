@@ -9,6 +9,8 @@ public:
 	// Inserts new record to the table. Returns index of inserted record (or existing)
 	std::shared_ptr<MemoryOperand> insert(const std::string& name);
 
+	// Allocate record for temporary variable
+	std::shared_ptr<MemoryOperand> alloc();
 	// Single element of table
 	struct TableRecord {
 		TableRecord(std::string& _name);

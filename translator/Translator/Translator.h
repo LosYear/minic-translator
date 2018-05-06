@@ -16,10 +16,14 @@ public:
 
 	// Adds new atom to list of atoms
 	void generateAtom(std::unique_ptr<Atom> atom);
+
+	// Generates new label
+	std::shared_ptr<LabelOperand> newLabel();
 private:
 	std::vector<std::unique_ptr<Atom>> _atoms;
 	StringTable _stringTable;
 	SymbolTable _symbolTable;
 	LexicalScanner _lexicalAnalyzer;
 	LexicalToken _currentLexem;
+	unsigned int _currentLabelId;
 };

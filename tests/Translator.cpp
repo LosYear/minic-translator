@@ -24,5 +24,17 @@ namespace tests
 
 			Assert::AreEqual("(JMP, , , lbl`10`)\n(LBL, , , lbl`10`)", out.str().c_str());
 		}
+
+		TEST_METHOD(Translator__newLabel)
+		{
+			std::istringstream stream;
+			Translator translator(stream);
+
+			auto lbl0 = translator.newLabel();
+			auto lbl1 = translator.newLabel();
+
+			Assert::AreEqual("lbl`0`", lbl0->toString().c_str());
+			Assert::AreEqual("lbl`1`", lbl1->toString().c_str());
+		}
 	};
 }

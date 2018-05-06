@@ -60,5 +60,15 @@ namespace tests
 
 			Assert::IsFalse(rec2 == rec3);
 		}
+
+		TEST_METHOD(SymbolTable__Alloc) 
+		{
+			SymbolTable symbolTable;
+			auto record = symbolTable.alloc();
+			auto record2 = symbolTable.alloc();
+
+			Assert::IsTrue(MemoryOperand(0, &symbolTable) == *record);
+			Assert::IsTrue(MemoryOperand(1, &symbolTable) == *record2);
+		}
 	};
 }
