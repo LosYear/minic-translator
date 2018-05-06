@@ -130,6 +130,7 @@
     <ClInclude Include="Operand\Operand.h" />
     <ClInclude Include="StringTable\StringTable.h" />
     <ClInclude Include="SymbolTable\SymbolTable.h" />
+    <ClInclude Include="Translator\Exception.h" />
     <ClInclude Include="Translator\Translator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

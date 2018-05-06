@@ -19,6 +19,12 @@ public:
 
 	// Generates new label
 	std::shared_ptr<LabelOperand> newLabel();
+
+	// Throws syntax error
+	void throwSyntaxError(const std::string& text) const;
+
+	// Throws lexical error
+	void throwLexicalError(const std::string& text) const;
 private:
 	std::vector<std::unique_ptr<Atom>> _atoms;
 	StringTable _stringTable;
