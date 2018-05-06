@@ -7,7 +7,8 @@ class StringTable;
 // Base class for all operands
 class Operand {
 	// Represents operand as string
-	virtual std::string toString(bool expanded) const = 0;
+public:
+	virtual std::string toString(bool expanded = false) const = 0;
 };
 
 
