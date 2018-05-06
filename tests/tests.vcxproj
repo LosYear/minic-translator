@@ -101,7 +101,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)..\translator_build\$(Configuration)\StringTable.obj;$(SolutionDir)..\translator_build\$(Configuration)\SymbolTable.obj;$(SolutionDir)..\translator_build\$(Configuration)\Operand.obj;$(SolutionDir)..\translator_build\$(Configuration)\Atom.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\translator_build\$(Configuration)\StringTable.obj;$(SolutionDir)..\translator_build\$(Configuration)\SymbolTable.obj;$(SolutionDir)..\translator_build\$(Configuration)\Operand.obj;$(SolutionDir)..\translator_build\$(Configuration)\Atom.obj;$(SolutionDir)..\translator_build\$(Configuration)\Token.obj;$(SolutionDir)..\translator_build\$(Configuration)\Scanner.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Atoms.cpp" />
+    <ClCompile Include="LexicalAnalyzer.cpp" />
     <ClCompile Include="Operands.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
