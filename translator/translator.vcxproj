@@ -121,6 +121,7 @@
     <ClCompile Include="Operand\Operand.cpp" />
     <ClCompile Include="StringTable\StringTable.cpp" />
     <ClCompile Include="SymbolTable\SymbolTable.cpp" />
+    <ClCompile Include="Translator\Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Atom\Atom.h" />
@@ -129,6 +130,7 @@
     <ClInclude Include="Operand\Operand.h" />
     <ClInclude Include="StringTable\StringTable.h" />
     <ClInclude Include="SymbolTable\SymbolTable.h" />
+    <ClInclude Include="Translator\Translator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

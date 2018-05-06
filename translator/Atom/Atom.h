@@ -5,6 +5,7 @@
 
 // Base class for all atoms
 class Atom {
+public:
 	virtual std::string toString() const = 0;
 };
 
