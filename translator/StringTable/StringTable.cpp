@@ -1,17 +1,17 @@
 #include "StringTable.h"
 
-int StringTable::insert(const std::string& str)
+std::shared_ptr<StringOperand> StringTable::insert(const std::string& str)
 {
 	// Check if string exists in table
 	for (unsigned int i = 0; i < _strings.size(); ++i) {
 		if (_strings[i] == str) {
-			return i;
+			return std::make_shared<StringOperand>(i, this);
 		}
 	}
 
 	// String not found, insert
 	_strings.push_back(str);
-	return _strings.size() - 1;
+	return std::make_shared<StringOperand>(_strings.size() - 1, this);
 }
 
 const std::string& StringTable::operator[](const int index) const {

@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "StringTable\StringTable.h"
+#include "Operand\Operand.h"
 #include <string>
 #include <sstream>
+#include <memory>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -15,13 +17,13 @@ namespace tests
 		TEST_METHOD(StringTable__InsertNew)
 		{
 			StringTable table;
-			const int index0 = table.insert("First string");
-			const int index1 = table.insert("Second string");
-			const int index2 = table.insert("Third string");
+			std::shared_ptr<StringOperand> op0 = table.insert("First string");
+			std::shared_ptr<StringOperand> op1 = table.insert("Second string");
+			std::shared_ptr<StringOperand> op2 = table.insert("Third string");
 
-			Assert::AreEqual(0, index0);
-			Assert::AreEqual(1, index1);
-			Assert::AreEqual(2, index2);
+			Assert::IsTrue(StringOperand(0, &table) == *op0);
+			Assert::IsTrue(StringOperand(1, &table) == *op1);
+			Assert::IsTrue(StringOperand(2, &table) == *op2);
 		}
 
 		TEST_METHOD(StringTable__InsertExisting)
@@ -29,12 +31,12 @@ namespace tests
 			StringTable table;
 			std::string str = "repeating string";
 			table.insert("First string");
-			const int index = table.insert(str);
+			std::shared_ptr<StringOperand> op = table.insert(str);
 			table.insert("Third string");
 
-			const int rep_index = table.insert(str);
+			std::shared_ptr<StringOperand> rep_op = table.insert(str);
 
-			Assert::AreEqual(index, rep_index);
+			Assert::IsTrue(*op == *rep_op);
 		}
 
 		TEST_METHOD(StringTable__OperatorAt)
@@ -42,10 +44,10 @@ namespace tests
 			StringTable table;
 			std::string str = "test string";
 			table.insert("a");
-			const int index = table.insert(str);
+			table.insert(str);
 			table.insert("b");
 
-			Assert::AreEqual(str.c_str(), table[index].c_str());
+			Assert::AreEqual(str.c_str(), table[1].c_str());
 		}
 
 		TEST_METHOD(StringTable__OperatorOut)

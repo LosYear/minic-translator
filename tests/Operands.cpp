@@ -16,10 +16,10 @@ namespace tests
 		{
 			SymbolTable symbolTable;
 			symbolTable.insert("a");
-			const int index = symbolTable.insert("b");
+			symbolTable.insert("b");
 			symbolTable.insert("c");
 
-			MemoryOperand memOp(index, &symbolTable);
+			MemoryOperand memOp(1, &symbolTable);
 			Assert::AreEqual("[MemOp, 1, b]", memOp.toString().c_str());
 		}
 
@@ -33,9 +33,9 @@ namespace tests
 		{
 			StringTable stringTable;
 			stringTable.insert("str1");
-			const int index = stringTable.insert("str2");
+			stringTable.insert("str2");
 			
-			StringOperand strOp(index, &stringTable);
+			StringOperand strOp(1, &stringTable);
 			Assert::AreEqual("[StrOp, 1, 'str2']", strOp.toString().c_str());
 		}
 

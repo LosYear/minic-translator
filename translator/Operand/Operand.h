@@ -20,6 +20,8 @@ class MemoryOperand : public RValue {
 public:
 	MemoryOperand(const int index, const SymbolTable* symbolTable);
 	std::string toString() const;
+
+	bool operator==(MemoryOperand& other);
 private:
 	const int _index;
 	const SymbolTable* _symbolTable;
@@ -41,6 +43,8 @@ class StringOperand : public Operand {
 public:
 	StringOperand(const int index, const StringTable* stringTable);
 	std::string toString() const;
+
+	bool operator==(StringOperand& other);
 private:
 	const int _index;
 	const StringTable* _stringTable;

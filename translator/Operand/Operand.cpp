@@ -19,6 +19,16 @@ std::string MemoryOperand::toString() const
 	return str;
 }
 
+bool MemoryOperand::operator==(MemoryOperand & other)
+{
+	return _index == other._index && _symbolTable == other._symbolTable;
+}
+
+bool StringOperand::operator==(StringOperand & other)
+{
+	return _index == other._index && _stringTable == other._stringTable;
+}
+
 std::string NumberOperand::toString() const
 {
 	std::string str = "[NumOp, " + std::to_string(_value) + "]";

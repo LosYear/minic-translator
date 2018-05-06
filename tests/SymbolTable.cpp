@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "SymbolTable\SymbolTable.h"
+#include "Operand\Operand.h"
 #include <string>
+#include <memory>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -14,13 +16,13 @@ namespace tests
 		TEST_METHOD(SymbolTable__InsertNew)
 		{
 			SymbolTable table;
-			const int index0 = table.insert("First string");
-			const int index1 = table.insert("Second string");
-			const int index2 = table.insert("Third string");
+			std::shared_ptr<MemoryOperand> op0 = table.insert("First string");
+			std::shared_ptr<MemoryOperand> op1 = table.insert("Second string");
+			std::shared_ptr<MemoryOperand> op2 = table.insert("Third string");
 
-			Assert::AreEqual(0, index0);
-			Assert::AreEqual(1, index1);
-			Assert::AreEqual(2, index2);
+			Assert::IsTrue(MemoryOperand(0, &table) == *op0);
+			Assert::IsTrue(MemoryOperand(1, &table) == *op1);
+			Assert::IsTrue(MemoryOperand(2, &table) == *op2);
 		}
 
 		TEST_METHOD(SymbolTable__InsertExisting)
@@ -28,12 +30,12 @@ namespace tests
 			SymbolTable table;
 			std::string str = "repeating string";
 			table.insert("First string");
-			const int index = table.insert(str);
+			std::shared_ptr<MemoryOperand> op = table.insert(str);
 			table.insert("Third string");
 
-			const int rep_index = table.insert(str);
+			std::shared_ptr<MemoryOperand> rep_op = table.insert(str);
 
-			Assert::AreEqual(index, rep_index);
+			Assert::IsTrue(*op == *rep_op);
 		}
 
 		TEST_METHOD(SymbolTable__OperatorAt)
@@ -41,10 +43,10 @@ namespace tests
 			SymbolTable table;
 			std::string str = "test string";
 			table.insert("a");
-			const int index = table.insert(str);
+			table.insert(str);
 			table.insert("b");
 
-			Assert::AreEqual(str.c_str(), table[index].name.c_str());
+			Assert::AreEqual(str.c_str(), table[1].name.c_str());
 		}
 
 		TEST_METHOD(SymbolTable__OperatorEqual)
