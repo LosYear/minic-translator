@@ -7,7 +7,7 @@ class StringTable;
 // Base class for all operands
 class Operand {
 	// Represents operand as string
-	virtual std::string toString() const = 0;
+	virtual std::string toString(bool expanded) const = 0;
 };
 
 
@@ -19,7 +19,7 @@ class RValue : public Operand {};
 class MemoryOperand : public RValue {
 public:
 	MemoryOperand(const int index, const SymbolTable* symbolTable);
-	std::string toString() const;
+	std::string toString(bool expanded = false) const;
 
 	bool operator==(MemoryOperand& other);
 private:
@@ -32,7 +32,7 @@ private:
 class NumberOperand : public RValue {
 public:
 	NumberOperand(const int value);
-	std::string toString() const;
+	std::string toString(bool expanded = false) const;
 private:
 	const int _value;
 };
@@ -42,7 +42,7 @@ private:
 class StringOperand : public Operand {
 public:
 	StringOperand(const int index, const StringTable* stringTable);
-	std::string toString() const;
+	std::string toString(bool expanded = false) const;
 
 	bool operator==(StringOperand& other);
 private:
@@ -55,7 +55,7 @@ private:
 class LabelOperand : public Operand {
 public:
 	LabelOperand(const int labelID);
-	std::string toString() const;
+	std::string toString(bool expanded = false) const;
 private:
 	int _id;
 };

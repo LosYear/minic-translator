@@ -20,13 +20,13 @@ namespace tests
 			symbolTable.insert("c");
 
 			MemoryOperand memOp(1, &symbolTable);
-			Assert::AreEqual("[MemOp, 1, b]", memOp.toString().c_str());
+			Assert::AreEqual("[MemOp, 1, b]", memOp.toString(true).c_str());
 		}
 
 		TEST_METHOD(NumberOperand__Init)
 		{
 			NumberOperand numOp(-14);
-			Assert::AreEqual("[NumOp, -14]", numOp.toString().c_str());
+			Assert::AreEqual("[NumOp, -14]", numOp.toString(true).c_str());
 		}
 
 		TEST_METHOD(StringOperand__Init)
@@ -36,13 +36,13 @@ namespace tests
 			stringTable.insert("str2");
 			
 			StringOperand strOp(1, &stringTable);
-			Assert::AreEqual("[StrOp, 1, 'str2']", strOp.toString().c_str());
+			Assert::AreEqual("[StrOp, 1, 'str2']", strOp.toString(true).c_str());
 		}
 
 		TEST_METHOD(LabelOperand__Init)
 		{
 			LabelOperand lblOp(14);
-			Assert::AreEqual("[LblOp, 14]", lblOp.toString().c_str());
+			Assert::AreEqual("[LblOp, 14]", lblOp.toString(true).c_str());
 		}
 	};
 }

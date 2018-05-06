@@ -13,8 +13,12 @@ _stringTable(stringTable) {}
 
 NumberOperand::NumberOperand(const int value) : _value(value) {}
 
-std::string MemoryOperand::toString() const
+std::string MemoryOperand::toString(bool expanded) const
 {
+	if (!expanded) {
+		return std::to_string(_index);
+	}
+
 	std::string str = "[MemOp, " + std::to_string(_index) + ", " + (*_symbolTable)[_index].name + "]";
 	return str;
 }
@@ -29,20 +33,32 @@ bool StringOperand::operator==(StringOperand & other)
 	return _index == other._index && _stringTable == other._stringTable;
 }
 
-std::string NumberOperand::toString() const
+std::string NumberOperand::toString(bool expanded) const
 {
+	if (!expanded) {
+		return "'" + std::to_string(_value) + "'";
+	}
+
 	std::string str = "[NumOp, " + std::to_string(_value) + "]";
 	return str;
 }
 
-std::string StringOperand::toString() const
+std::string StringOperand::toString(bool expanded) const
 {
+	if (!expanded) {
+		return "str`" + std::to_string(_index) + "`";
+	}
+
 	std::string str = "[StrOp, " + std::to_string(_index) + ", '" + (*_stringTable)[_index] + "']";
 	return str;
 }
 
-std::string LabelOperand::toString() const
+std::string LabelOperand::toString(bool expanded) const
 {
+	if (!expanded) {
+		return "lbl`" + std::to_string(_id) + "`";
+	}
+
 	std::string str = "[LblOp, " + std::to_string(_id) + "]";
 	return str;
 }
