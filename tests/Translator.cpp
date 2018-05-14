@@ -127,5 +127,33 @@ namespace tests
 			Assert::AreEqual("[MemOp, 0, var]", result->toString(true).c_str());
 		}
 
+		TEST_METHOD(Translator__E2_opnot)
+		{
+			std::istringstream stream("!var");
+			Translator translator(stream);
+
+			auto result = translator.E2();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 1, ]", result->toString(true).c_str());
+
+
+			std::ostringstream atoms;
+			translator.printAtoms(atoms);
+
+			Assert::AreEqual("(NOT, 0, , 1)", atoms.str().c_str());
+		}
+
+		TEST_METHOD(Translator__E2_downToE1)
+		{
+			std::istringstream stream("var");
+			Translator translator(stream);
+
+			auto result = translator.E2();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 0, var]", result->toString(true).c_str());
+		}
+
 	};
 }

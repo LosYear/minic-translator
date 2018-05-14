@@ -116,3 +116,19 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const std::string& p)
 
 	return _symbolTable.insert(p);
 }
+
+std::shared_ptr<RValue> Translator::E2()
+{
+	if (_currentLexem->type() == LexemType::opnot) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> q = E1();
+		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc();
+
+		generateAtom(std::make_unique<UnaryOpAtom>("NOT", q, r));
+
+		return r;
+	}
+
+	return E1();
+}

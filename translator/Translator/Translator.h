@@ -47,4 +47,6 @@ private:
 public:
 	std::shared_ptr<RValue> E1();
 	std::shared_ptr<MemoryOperand> E1_(const std::string& p);
+
+	std::shared_ptr<RValue> E2();
 };
