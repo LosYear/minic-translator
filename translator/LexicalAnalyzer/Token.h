@@ -34,6 +34,8 @@ public:
 
 	~LexicalToken();
 
+	static std::string lexemName(LexemType type);
+
 private:
 	// Time of given lexem
 	const LexemType _type;
@@ -43,6 +45,4 @@ private:
 
 	// String value of lexem
 	const std::string _str = "";
-
-	std::string lexemName() const;
 };

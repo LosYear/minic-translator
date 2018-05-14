@@ -14,7 +14,7 @@ LexicalToken LexicalScanner::getNextToken()
 		_stream >> std::noskipws >> c;
 		if (_state == 0) {
 			// End of input stream?
-			if (_stream.eof()) {
+			if (_stream.eof() || c == '\0') {
 				return LexicalToken(LexemType::eof);
 			}
 

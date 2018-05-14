@@ -7,7 +7,7 @@ BinaryOpAtom::BinaryOpAtom(const std::string& name, const std::shared_ptr<RValue
 
 std::string BinaryOpAtom::toString() const
 {
-	return "(" + _name + ", " + _left->toString() + ", " + _right->toString() + ", " + _result->toString() + ")";
+	return "(" + _name + ", " + ((_left != nullptr) ? _left->toString() : "") + ", " + ((_right != nullptr) ? _right->toString() : "") + ", " + _result->toString() + ")";
 }
 
 UnaryOpAtom::UnaryOpAtom(const std::string& name, const std::shared_ptr<RValue> operand, const std::shared_ptr<MemoryOperand> result) :

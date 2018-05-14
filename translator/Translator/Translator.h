@@ -25,11 +25,26 @@ public:
 
 	// Throws lexical error
 	void throwLexicalError(const std::string& text) const;
+
+	// Runs translation
+	bool translate();
 private:
 	std::vector<std::unique_ptr<Atom>> _atoms;
 	StringTable _stringTable;
 	SymbolTable _symbolTable;
 	LexicalScanner _lexicalAnalyzer;
-	LexicalToken _currentLexem;
+	std::unique_ptr<LexicalToken> _currentLexem;
 	unsigned int _currentLabelId;
+
+	// Gets next token and writes it to _currentLexem
+	LexicalToken _getNextLexem();
+
+	// Checks current token and gets next
+	bool _takeTerm(LexemType type);
+
+	// Recursive descent rules
+
+public:
+	std::shared_ptr<RValue> E1();
+	std::shared_ptr<MemoryOperand> E1_(const std::string& p);
 };

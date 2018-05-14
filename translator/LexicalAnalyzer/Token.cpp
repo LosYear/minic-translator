@@ -44,15 +44,13 @@ std::string LexicalToken::toString() const
 		return std::string("[chr, '") + static_cast<char>(_value) + std::string("']");
 	}
 	else {
-		return "[" + lexemName() + "]";
+		return "[" + lexemName(_type) + "]";
 	}
 }
-
 LexemType LexicalToken::type() const
 {
 	return _type;
 }
-
 int LexicalToken::value() const
 {
 	return _value;
@@ -67,7 +65,7 @@ LexicalToken::~LexicalToken()
 {
 }
 
-std::string LexicalToken::lexemName() const
+std::string LexicalToken::lexemName(LexemType _type)
 {
 	switch (_type) {
 	case LexemType::num:
