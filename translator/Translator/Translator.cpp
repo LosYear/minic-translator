@@ -150,7 +150,7 @@ std::shared_ptr<RValue> Translator::E3()
 	if (!s) {
 		return nullptr; // @TODO: syntax error
 	}
-	
+
 	return s;
 }
 
@@ -170,6 +170,71 @@ std::shared_ptr<RValue> Translator::E3_(std::shared_ptr<RValue> p)
 		generateAtom(std::make_unique<BinaryOpAtom>("MUL", p, r, s));
 
 		std::shared_ptr<RValue> t = E3_(s);
+
+		if (!t) {
+			return nullptr; // @Todo: syntax error
+		}
+
+		return t;
+	}
+
+	return p;
+}
+
+std::shared_ptr<RValue> Translator::E4()
+{
+	std::shared_ptr<RValue> q = E3();
+
+	if (!q) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	std::shared_ptr<RValue> s = E4_(q);
+
+	if (!s) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	return s;
+}
+
+std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
+{
+	if (_currentLexem->type() == LexemType::opplus) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> r = E3();
+
+		if (!r) {
+			return nullptr; // @todo: syntax error
+		}
+
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+
+		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, r, s));
+
+		std::shared_ptr<RValue> t = E4_(s);
+
+		if (!t) {
+			return nullptr; // @Todo: syntax error
+		}
+
+		return t;
+	}
+	else if (_currentLexem->type() == LexemType::opminus) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> r = E3();
+
+		if (!r) {
+			return nullptr; // @todo: syntax error
+		}
+
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+
+		generateAtom(std::make_unique<BinaryOpAtom>("SUB", p, r, s));
+
+		std::shared_ptr<RValue> t = E4_(s);
 
 		if (!t) {
 			return nullptr; // @Todo: syntax error
