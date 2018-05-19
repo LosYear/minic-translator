@@ -155,5 +155,52 @@ namespace tests
 			Assert::AreEqual("[MemOp, 0, var]", result->toString(true).c_str());
 		}
 
+		TEST_METHOD(Translator__E3_opmult)
+		{
+			// Case 1
+			std::istringstream stream("2 * 2");
+			Translator translator(stream);
+
+			auto result = translator.E3();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+
+			std::ostringstream atoms;
+			translator.printAtoms(atoms);
+
+			Assert::AreEqual("(MUL, '2', '2', 0)", atoms.str().c_str());
+
+
+			// Case 2
+			std::istringstream stream2("var * 2");
+			Translator translator2(stream2);
+
+			auto result2 = translator2.E3();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
+			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+
+
+			std::ostringstream atoms2;
+			translator2.printAtoms(atoms2);
+
+			Assert::AreEqual("(MUL, 0, '2', 1)", atoms2.str().c_str());
+			
+			// Case 3
+			std::istringstream stream3("var * var2 * var");
+			Translator translator3(stream3);
+
+			auto result3 = translator3.E3();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
+			Assert::AreEqual("[MemOp, 3, ]", result3->toString(true).c_str());
+
+			std::ostringstream atoms3;
+			translator3.printAtoms(atoms3);
+
+			Assert::AreEqual("(MUL, 0, 1, 2)\n(MUL, 2, 0, 3)", atoms3.str().c_str());
+		}
+
 	};
 }

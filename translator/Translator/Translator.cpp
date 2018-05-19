@@ -125,10 +125,58 @@ std::shared_ptr<RValue> Translator::E2()
 		std::shared_ptr<RValue> q = E1();
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc();
 
+		if (!q) {
+			// @TODO :: ERROR
+		}
+
 		generateAtom(std::make_unique<UnaryOpAtom>("NOT", q, r));
 
 		return r;
 	}
 
 	return E1();
+}
+
+std::shared_ptr<RValue> Translator::E3()
+{
+	std::shared_ptr<RValue> q = E2();
+
+	if (!q) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	std::shared_ptr<RValue> s = E3_(q);
+
+	if (!s) {
+		return nullptr; // @TODO: syntax error
+	}
+	
+	return s;
+}
+
+std::shared_ptr<RValue> Translator::E3_(std::shared_ptr<RValue> p)
+{
+	if (_currentLexem->type() == LexemType::opmult) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> r = E2();
+
+		if (!r) {
+			return nullptr; // @todo: syntax error
+		}
+
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+
+		generateAtom(std::make_unique<BinaryOpAtom>("MUL", p, r, s));
+
+		std::shared_ptr<RValue> t = E3_(s);
+
+		if (!t) {
+			return nullptr; // @Todo: syntax error
+		}
+
+		return t;
+	}
+
+	return p;
 }
