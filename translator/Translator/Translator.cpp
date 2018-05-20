@@ -1,25 +1,29 @@
 #include "Translator.h"
 #include "Exception.h"
+#include <iomanip>
 
 Translator::Translator(std::istream & stream, std::ostream& errStream) : _lexicalAnalyzer(LexicalScanner(stream)), _currentLexem(nullptr),
 _currentLabelId(0), _errStream(errStream), _lexemHistory(LexemHistory(4)) {
 	_getNextLexem();
 }
 
-void Translator::printAtoms(std::ostream & stream) const
+void Translator::printAtoms(std::ostream & stream, const unsigned int width) const
 {
-	for (unsigned int i = 0; i < _atoms.size(); ++i) {
-		stream << (_atoms[i])->toString();
+	for (auto context = _atoms.begin(); context != _atoms.end(); ++context) {
+		for (unsigned int i = 0; i < context->second.size(); ++i) {
+			stream << std::setw(width) << context->first;
+			stream << " " << (context->second[i])->toString();
 
-		if (i != _atoms.size() - 1) {
-			stream << std::endl;
+			if (!(std::next(context) == _atoms.end() && i == context->second.size() - 1)) {
+				stream << std::endl;
+			}
 		}
 	}
 }
 
-void Translator::generateAtom(std::unique_ptr<Atom> atom)
+void Translator::generateAtom(std::unique_ptr<Atom> atom, Scope scope)
 {
-	_atoms.push_back(std::move(atom));
+	_atoms[scope].push_back(std::move(atom));
 }
 
 std::shared_ptr<LabelOperand> Translator::newLabel()
@@ -54,7 +58,7 @@ void Translator::throwLexicalError(const std::string & text) const
 bool Translator::translate()
 {
 	try {
-		if (!E()) {
+		if (!E(SymbolTable::GLOBAL_SCOPE)) {
 			return false;
 		}
 
@@ -99,15 +103,15 @@ bool Translator::_takeTerm(LexemType type)
 
 std::shared_ptr<RValue> Translator::translateExpresssion()
 {
-	return E7();
+	return E7(SymbolTable::GLOBAL_SCOPE);
 }
 
-std::shared_ptr<RValue> Translator::E1()
+std::shared_ptr<RValue> Translator::E1(const Scope context)
 {
 	if (_currentLexem->type() == LexemType::lpar) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> q = E();
+		std::shared_ptr<RValue> q = E(context);
 
 		if (!q) {
 			throwSyntaxError("God knows when it breakes");
@@ -127,9 +131,9 @@ std::shared_ptr<RValue> Translator::E1()
 	else if (_currentLexem->type() == LexemType::opinc) {
 		_getNextLexem();
 
-		std::shared_ptr<MemoryOperand> q = _symbolTable.insert(_currentLexem->str());
+		std::shared_ptr<MemoryOperand> q = _symbolTable.insertVar(_currentLexem->str(), context, SymbolTable::TableRecord::RecordType::unknown); // @TODO: replace with checkVar
 
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q));
+		generateAtom(std::make_unique<BinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q), context);
 
 		_getNextLexem();
 
@@ -140,7 +144,7 @@ std::shared_ptr<RValue> Translator::E1()
 		_getNextLexem();
 
 		// @TODO: can it break?
-		return E1_(name);
+		return E1_(context, name);
 
 	}
 
@@ -148,7 +152,7 @@ std::shared_ptr<RValue> Translator::E1()
 	return nullptr;
 }
 
-std::shared_ptr<MemoryOperand> Translator::E1_(const std::string& p)
+std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::string& p)
 {
 	if (_currentLexem->type() == LexemType::lpar) {
 		throwSyntaxError("Unimplemented feature, E1_::lpar rule#30");
@@ -156,47 +160,47 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const std::string& p)
 	else if (_currentLexem->type() == LexemType::opinc) {
 		_getNextLexem();
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.insert(p);
-		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.insertVar(p, context, SymbolTable::TableRecord::RecordType::unknown); // @Todo:: replace with checkVar
+		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<UnaryOpAtom>("MOV", s, r));
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s));
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", s, r), context);
+		generateAtom(std::make_unique<BinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s), context);
 
 		return r;
 	}
 
-	return _symbolTable.insert(p);
+	return _symbolTable.insertVar(p, context, SymbolTable::TableRecord::RecordType::unknown); // @TODO: replace with checkVar
 }
 
-std::shared_ptr<RValue> Translator::E2()
+std::shared_ptr<RValue> Translator::E2(const Scope context)
 {
 	if (_currentLexem->type() == LexemType::opnot) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> q = E1();
-		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc();
+		std::shared_ptr<RValue> q = E1(context);
+		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
 		if (!q) {
 			return nullptr;
 		}
 
-		generateAtom(std::make_unique<UnaryOpAtom>("NOT", q, r));
+		generateAtom(std::make_unique<UnaryOpAtom>("NOT", q, r), context);
 
 		return r;
 	}
 
-	return E1();
+	return E1(context);
 }
 
-std::shared_ptr<RValue> Translator::E3()
+std::shared_ptr<RValue> Translator::E3(const Scope context)
 {
-	std::shared_ptr<RValue> q = E2();
+	std::shared_ptr<RValue> q = E2(context);
 
 	if (!q) {
 		return nullptr;
 	}
 
-	std::shared_ptr<RValue> s = E3_(q);
+	std::shared_ptr<RValue> s = E3_(context, q);
 
 	if (!s) {
 		return nullptr;
@@ -205,22 +209,22 @@ std::shared_ptr<RValue> Translator::E3()
 	return s;
 }
 
-std::shared_ptr<RValue> Translator::E3_(std::shared_ptr<RValue> p)
+std::shared_ptr<RValue> Translator::E3_(const Scope context, std::shared_ptr<RValue> p)
 {
 	if (_currentLexem->type() == LexemType::opmult) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> r = E2();
+		std::shared_ptr<RValue> r = E2(context);
 
 		if (!r) {
 			return nullptr;
 		}
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("MUL", p, r, s));
+		generateAtom(std::make_unique<BinaryOpAtom>("MUL", p, r, s), context);
 
-		std::shared_ptr<RValue> t = E3_(s);
+		std::shared_ptr<RValue> t = E3_(context, s);
 
 		if (!t) {
 			return nullptr;
@@ -232,15 +236,15 @@ std::shared_ptr<RValue> Translator::E3_(std::shared_ptr<RValue> p)
 	return p;
 }
 
-std::shared_ptr<RValue> Translator::E4()
+std::shared_ptr<RValue> Translator::E4(const Scope context)
 {
-	std::shared_ptr<RValue> q = E3();
+	std::shared_ptr<RValue> q = E3(context);
 
 	if (!q) {
 		return nullptr;
 	}
 
-	std::shared_ptr<RValue> s = E4_(q);
+	std::shared_ptr<RValue> s = E4_(context, q);
 
 	if (!s) {
 		return nullptr;
@@ -249,22 +253,22 @@ std::shared_ptr<RValue> Translator::E4()
 	return s;
 }
 
-std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
+std::shared_ptr<RValue> Translator::E4_(const Scope context, std::shared_ptr<RValue> p)
 {
 	if (_currentLexem->type() == LexemType::opplus) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> r = E3();
+		std::shared_ptr<RValue> r = E3(context);
 
 		if (!r) {
 			return nullptr;
 		}
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, r, s));
+		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, r, s), context);
 
-		std::shared_ptr<RValue> t = E4_(s);
+		std::shared_ptr<RValue> t = E4_(context, s);
 
 		if (!t) {
 			return nullptr;
@@ -275,17 +279,17 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 	else if (_currentLexem->type() == LexemType::opminus) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> r = E3();
+		std::shared_ptr<RValue> r = E3(context);
 
 		if (!r) {
 			return nullptr;
 		}
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("SUB", p, r, s));
+		generateAtom(std::make_unique<BinaryOpAtom>("SUB", p, r, s), context);
 
-		std::shared_ptr<RValue> t = E4_(s);
+		std::shared_ptr<RValue> t = E4_(context, s);
 
 		if (!t) {
 			return nullptr;
@@ -297,15 +301,15 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 	return p;
 }
 
-std::shared_ptr<RValue> Translator::E5()
+std::shared_ptr<RValue> Translator::E5(const Scope context)
 {
-	std::shared_ptr<RValue> q = E4();
+	std::shared_ptr<RValue> q = E4(context);
 
 	if (!q) {
 		return nullptr;
 	}
 
-	std::shared_ptr<RValue> s = E5_(q);
+	std::shared_ptr<RValue> s = E5_(context, q);
 
 	if (!s) {
 		return nullptr;
@@ -314,7 +318,7 @@ std::shared_ptr<RValue> Translator::E5()
 	return s;
 }
 
-std::shared_ptr<RValue> Translator::E5_(std::shared_ptr<RValue> p)
+std::shared_ptr<RValue> Translator::E5_(const Scope context, std::shared_ptr<RValue> p)
 {
 	if (_currentLexem->type() == LexemType::opeq || _currentLexem->type() == LexemType::opne ||
 		_currentLexem->type() == LexemType::opgt || _currentLexem->type() == LexemType::oplt ||
@@ -322,35 +326,35 @@ std::shared_ptr<RValue> Translator::E5_(std::shared_ptr<RValue> p)
 		LexemType currentLexem = _currentLexem->type();
 		_getNextLexem();
 
-		std::shared_ptr<RValue> r = E4();
+		std::shared_ptr<RValue> r = E4(context);
 
 		if (!r) {
 			return nullptr;
 		}
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 		std::shared_ptr<LabelOperand> l = newLabel();
 
-		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(1), s));
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(1), s), context);
 
 		if (currentLexem == LexemType::opeq) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, r, l));
+			generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::opne) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("NE", p, r, l));
+			generateAtom(std::make_unique<ConditionalJumpAtom>("NE", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::opgt) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("GT", p, r, l));
+			generateAtom(std::make_unique<ConditionalJumpAtom>("GT", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::oplt) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("LT", p, r, l));
+			generateAtom(std::make_unique<ConditionalJumpAtom>("LT", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::ople) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("LE", p, r, l));
+			generateAtom(std::make_unique<ConditionalJumpAtom>("LE", p, r, l), context);
 		}
 
-		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(0), s));
-		generateAtom(std::make_unique<LabelAtom>(l));
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(0), s), context);
+		generateAtom(std::make_unique<LabelAtom>(l), context);
 
 		return s;
 	}
@@ -359,15 +363,15 @@ std::shared_ptr<RValue> Translator::E5_(std::shared_ptr<RValue> p)
 }
 
 
-std::shared_ptr<RValue> Translator::E6()
+std::shared_ptr<RValue> Translator::E6(const Scope context)
 {
-	std::shared_ptr<RValue> q = E5();
+	std::shared_ptr<RValue> q = E5(context);
 
 	if (!q) {
 		return nullptr;
 	}
 
-	std::shared_ptr<RValue> s = E6_(q);
+	std::shared_ptr<RValue> s = E6_(context, q);
 
 	if (!s) {
 		return nullptr;
@@ -376,22 +380,22 @@ std::shared_ptr<RValue> Translator::E6()
 	return s;
 }
 
-std::shared_ptr<RValue> Translator::E6_(std::shared_ptr<RValue> p)
+std::shared_ptr<RValue> Translator::E6_(const Scope context, std::shared_ptr<RValue> p)
 {
 	if (_currentLexem->type() == LexemType::opand) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> r = E5();
+		std::shared_ptr<RValue> r = E5(context);
 
 		if (!r) {
 			return nullptr;
 		}
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("AND", p, r, s));
+		generateAtom(std::make_unique<BinaryOpAtom>("AND", p, r, s), context);
 
-		std::shared_ptr<RValue> t = E6_(s);
+		std::shared_ptr<RValue> t = E6_(context, s);
 
 		if (!t) {
 			return nullptr;
@@ -403,15 +407,15 @@ std::shared_ptr<RValue> Translator::E6_(std::shared_ptr<RValue> p)
 	return p;
 }
 
-std::shared_ptr<RValue> Translator::E7()
+std::shared_ptr<RValue> Translator::E7(const Scope context)
 {
-	std::shared_ptr<RValue> q = E6();
+	std::shared_ptr<RValue> q = E6(context);
 
 	if (!q) {
 		return nullptr;
 	}
 
-	std::shared_ptr<RValue> s = E7_(q);
+	std::shared_ptr<RValue> s = E7_(context, q);
 
 	if (!s) {
 		return nullptr;
@@ -420,22 +424,22 @@ std::shared_ptr<RValue> Translator::E7()
 	return s;
 }
 
-std::shared_ptr<RValue> Translator::E7_(std::shared_ptr<RValue> p)
+std::shared_ptr<RValue> Translator::E7_(const Scope context, std::shared_ptr<RValue> p)
 {
 	if (_currentLexem->type() == LexemType::opor) {
 		_getNextLexem();
 
-		std::shared_ptr<RValue> r = E6();
+		std::shared_ptr<RValue> r = E6(context);
 
 		if (!r) {
 			return nullptr;
 		}
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("OR", p, r, s));
+		generateAtom(std::make_unique<BinaryOpAtom>("OR", p, r, s), context);
 
-		std::shared_ptr<RValue> t = E7_(s);
+		std::shared_ptr<RValue> t = E7_(context, s);
 
 		if (!t) {
 			return nullptr;
@@ -447,7 +451,7 @@ std::shared_ptr<RValue> Translator::E7_(std::shared_ptr<RValue> p)
 	return p;
 }
 
-std::shared_ptr<RValue> Translator::E()
+std::shared_ptr<RValue> Translator::E(const Scope context)
 {
-	return E7();
+	return E7(context);
 }

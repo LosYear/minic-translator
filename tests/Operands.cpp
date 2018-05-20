@@ -15,9 +15,9 @@ namespace tests
 		TEST_METHOD(MemoryOperand__Init)
 		{
 			SymbolTable symbolTable;
-			symbolTable.insert("a");
-			symbolTable.insert("b");
-			symbolTable.insert("c");
+			symbolTable.insertVar("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+			symbolTable.insertVar("b", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+			symbolTable.insertVar("c", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
 
 			MemoryOperand memOp(1, &symbolTable);
 			Assert::AreEqual("[MemOp, 1, b]", memOp.toString(true).c_str());
@@ -34,7 +34,7 @@ namespace tests
 			StringTable stringTable;
 			stringTable.insert("str1");
 			stringTable.insert("str2");
-			
+
 			StringOperand strOp(1, &stringTable);
 			Assert::AreEqual("[StrOp, 1, 'str2']", strOp.toString(true).c_str());
 		}

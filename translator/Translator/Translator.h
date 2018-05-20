@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <map>
 #include <iostream>
 #include "..\Atom\Atom.h"
 #include "..\StringTable\StringTable.h"
@@ -13,10 +14,10 @@ public:
 	Translator(std::istream& stream, std::ostream& errStream = std::cerr);
 
 	// Prints atoms list to a stream
-	void printAtoms(std::ostream& stream) const;
+	void printAtoms(std::ostream& stream, const unsigned int width = 10) const;
 
 	// Adds new atom to list of atoms
-	void generateAtom(std::unique_ptr<Atom> atom);
+	void generateAtom(std::unique_ptr<Atom> atom, Scope scope);
 
 	// Generates new label
 	std::shared_ptr<LabelOperand> newLabel();
@@ -33,7 +34,7 @@ public:
 	// Translates single expression
 	std::shared_ptr<RValue> translateExpresssion();
 private:
-	std::vector<std::unique_ptr<Atom>> _atoms;
+	std::map<Scope, std::vector<std::unique_ptr<Atom>>> _atoms;
 	StringTable _stringTable;
 	SymbolTable _symbolTable;
 	LexicalScanner _lexicalAnalyzer;
@@ -53,25 +54,25 @@ private:
 	bool _takeTerm(LexemType type);
 
 	// Recursive descent rules
-	std::shared_ptr<RValue> E1();
-	std::shared_ptr<MemoryOperand> E1_(const std::string& p);
+	std::shared_ptr<RValue> E1(const Scope context);
+	std::shared_ptr<MemoryOperand> E1_(const Scope context, const std::string& p);
 
-	std::shared_ptr<RValue> E2();
+	std::shared_ptr<RValue> E2(const Scope context);
 
-	std::shared_ptr<RValue> E3();
-	std::shared_ptr<RValue> E3_(std::shared_ptr<RValue> p);
+	std::shared_ptr<RValue> E3(const Scope context);
+	std::shared_ptr<RValue> E3_(const Scope context, std::shared_ptr<RValue> p);
 
-	std::shared_ptr<RValue> E4();
-	std::shared_ptr<RValue> E4_(std::shared_ptr<RValue> p);
+	std::shared_ptr<RValue> E4(const Scope context);
+	std::shared_ptr<RValue> E4_(const Scope context, std::shared_ptr<RValue> p);
 
-	std::shared_ptr<RValue> E5();
-	std::shared_ptr<RValue> E5_(std::shared_ptr<RValue> p);
+	std::shared_ptr<RValue> E5(const Scope context);
+	std::shared_ptr<RValue> E5_(const Scope context, std::shared_ptr<RValue> p);
 
-	std::shared_ptr<RValue> E6();
-	std::shared_ptr<RValue> E6_(std::shared_ptr<RValue> p);
+	std::shared_ptr<RValue> E6(const Scope context);
+	std::shared_ptr<RValue> E6_(const Scope context, std::shared_ptr<RValue> p);
 
-	std::shared_ptr<RValue> E7();
-	std::shared_ptr<RValue> E7_(std::shared_ptr<RValue> p);
+	std::shared_ptr<RValue> E7(const Scope context);
+	std::shared_ptr<RValue> E7_(const Scope context, std::shared_ptr<RValue> p);
 
-	std::shared_ptr<RValue> E();
+	std::shared_ptr<RValue> E(const Scope context);
 };

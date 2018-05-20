@@ -1,25 +1,80 @@
 #include <iomanip>
 #include "SymbolTable.h"
 
-std::shared_ptr<MemoryOperand> SymbolTable::insert(const std::string & name, TableRecord::RecordKind kind, TableRecord::RecordType type, int len, int init, Scope scope, int offset)
+std::shared_ptr<MemoryOperand> SymbolTable::insertVar(const std::string & name, const Scope scope, const TableRecord::RecordType type, const unsigned int init)
 {
-	// Record not found, insert
-	TableRecord record(name, kind, type, len, init, scope, offset);
-
 	// Check if record exists in table
 	for (unsigned int i = 0; i < _records.size(); ++i) {
-		if (_records[i] == record) {
-			return std::make_shared<MemoryOperand>(i, this);
+		if (_records[i].name == name && _records[i].scope == scope) {
+			return nullptr;
 		}
 	}
+
+	// Record not found, insert
+	TableRecord record(name, TableRecord::RecordKind::var, type, -1, init, scope, 0);
 
 	_records.push_back(record);
 	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
 }
 
-std::shared_ptr<MemoryOperand> SymbolTable::alloc()
+std::shared_ptr<MemoryOperand> SymbolTable::insertFunc(const std::string & name, const TableRecord::RecordType type, const int len)
 {
-	_records.push_back(TableRecord("[tmp" + std::to_string(_records.size()) + "]"));
+	// Check if record exists in table
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].scope == SymbolTable::GLOBAL_SCOPE) {
+			return nullptr;
+		}
+	}
+
+	// Record not found, insert
+	TableRecord record(name, TableRecord::RecordKind::func, type, len, 0, SymbolTable::GLOBAL_SCOPE, 0);
+
+	_records.push_back(record);
+	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
+}
+
+std::shared_ptr<MemoryOperand> SymbolTable::checkVar(const Scope scope, const std::string & name)
+{
+	// Find var in given scope
+	int globalScopedValue = -1;
+
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].scope == scope &&
+			_records[i].kind == SymbolTable::TableRecord::RecordKind::var) {
+			return std::make_shared<MemoryOperand>(i, this);
+		}
+		else if (_records[i].name == name && _records[i].scope == SymbolTable::GLOBAL_SCOPE
+			&& _records[i].kind == SymbolTable::TableRecord::RecordKind::var) {
+			globalScopedValue = i;
+		}
+	}
+
+	if (globalScopedValue == -1) {
+		return nullptr;
+	}
+
+	return std::make_shared<MemoryOperand>(globalScopedValue, this);
+}
+
+std::shared_ptr<MemoryOperand> SymbolTable::checkFunc(const std::string & name, const int len)
+{
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].len == len &&
+			_records[i].kind == SymbolTable::TableRecord::RecordKind::func &&
+			_records[i].scope == SymbolTable::GLOBAL_SCOPE) {
+			return std::make_shared<MemoryOperand>(i, this);
+		}
+	}
+
+	return nullptr;
+}
+
+std::shared_ptr<MemoryOperand> SymbolTable::alloc(Scope scope)
+{
+	_records.push_back(TableRecord("[tmp" + std::to_string(_records.size()) + "]",
+		TableRecord::RecordKind::var,
+		TableRecord::RecordType::integer,
+		-1, 0, scope));
 	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
 }
 
