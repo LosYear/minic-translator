@@ -60,4 +60,7 @@ public:
 
 	std::shared_ptr<RValue> E5();
 	std::shared_ptr<RValue> E5_(std::shared_ptr<RValue> p);
+
+	std::shared_ptr<RValue> E6();
+	std::shared_ptr<RValue> E6_(std::shared_ptr<RValue> p);
 };

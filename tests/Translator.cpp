@@ -530,5 +530,38 @@ namespace tests
 
 			Assert::AreEqual("(MOV, '1', , 2)\n(LE, 0, 1, lbl`0`)\n(MOV, '0', , 2)\n(LBL, , , lbl`0`)", atoms3.str().c_str());
 		}
+
+		TEST_METHOD(Translator__E6_opand)
+		{
+			// Case 1
+			std::istringstream stream("var1 && var2");
+			Translator translator(stream);
+
+			auto result = translator.translateExpresssion();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 2, ]", result->toString(true).c_str());
+
+			std::ostringstream atoms;
+			translator.printAtoms(atoms);
+
+			Assert::AreEqual("(AND, 0, 1, 2)", atoms.str().c_str());
+
+
+			// Case 2
+			std::istringstream stream2("var1 && var2 && var3");
+			Translator translator2(stream2);
+
+			auto result2 = translator2.translateExpresssion();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
+			Assert::AreEqual("[MemOp, 4, ]", result2->toString(true).c_str());
+
+
+			std::ostringstream atoms2;
+			translator2.printAtoms(atoms2);
+
+			Assert::AreEqual("(AND, 0, 1, 2)\n(AND, 2, 3, 4)", atoms2.str().c_str());
+		}
 	};
 }

@@ -65,7 +65,7 @@ bool Translator::_takeTerm(LexemType type)
 
 std::shared_ptr<RValue> Translator::translateExpresssion()
 {
-	return E5();
+	return E6();
 }
 
 std::shared_ptr<RValue> Translator::E1()
@@ -307,6 +307,51 @@ std::shared_ptr<RValue> Translator::E5_(std::shared_ptr<RValue> p)
 		generateAtom(std::make_unique<LabelAtom>(l));
 
 		return s;
+	}
+
+	return p;
+}
+
+
+std::shared_ptr<RValue> Translator::E6()
+{
+	std::shared_ptr<RValue> q = E5();
+
+	if (!q) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	std::shared_ptr<RValue> s = E6_(q);
+
+	if (!s) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	return s;
+}
+
+std::shared_ptr<RValue> Translator::E6_(std::shared_ptr<RValue> p)
+{
+	if (_currentLexem->type() == LexemType::opand) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> r = E5();
+
+		if (!r) {
+			return nullptr; // @todo: syntax error
+		}
+
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+
+		generateAtom(std::make_unique<BinaryOpAtom>("AND", p, r, s));
+
+		std::shared_ptr<RValue> t = E6_(s);
+
+		if (!t) {
+			return nullptr; //@todo : syntax error
+		}
+
+		return t;
 	}
 
 	return p;
