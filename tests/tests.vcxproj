@@ -171,6 +171,7 @@
     </ClCompile>
     <ClCompile Include="StringTable.cpp" />
     <ClCompile Include="SymbolTable.cpp" />
+    <ClCompile Include="TranslatorErrors.cpp" />
     <ClCompile Include="TranslatorRules.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

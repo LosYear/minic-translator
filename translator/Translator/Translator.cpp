@@ -1,7 +1,8 @@
 #include "Translator.h"
 #include "Exception.h"
 
-Translator::Translator(std::istream & stream) : _lexicalAnalyzer(LexicalScanner(stream)), _currentLexem(nullptr), _currentLabelId(0) {
+Translator::Translator(std::istream & stream, std::ostream& errStream) : _lexicalAnalyzer(LexicalScanner(stream)), _currentLexem(nullptr), 
+_currentLabelId(0), _errStream(errStream) {
 	_getNextLexem();
 }
 
@@ -33,13 +34,32 @@ void Translator::throwSyntaxError(const std::string & text) const
 
 void Translator::throwLexicalError(const std::string & text) const
 {
-	throw LexicalError(text);
+	std::string errorMessage = text + "\n After lexems:";
+	auto lexems = _lexemHistory.getAll();
+
+	for (unsigned int i = 0; i < lexems.size(); ++i) {
+		errorMessage += " " + lexems[i].toString();
+	}
+
+	throw LexicalError(errorMessage);
 }
 
 bool Translator::translate()
 {
+	try {
+		if (!E()) {
+			return false;
+		}
 
-	return true;
+		return true;
+	}
+	catch (const LexicalError& error) {
+		_errStream << error.what();
+		return false;
+	}
+	catch (const SyntaxError&  error) {
+
+	}
 }
 
 LexicalToken Translator::_getNextLexem()
@@ -48,6 +68,9 @@ LexicalToken Translator::_getNextLexem()
 
 	if (_currentLexem->type() == LexemType::error) {
 		throwLexicalError(_currentLexem->str());
+	}
+	else {
+		_lexemHistory.push(*_currentLexem);
 	}
 
 	return *_currentLexem;

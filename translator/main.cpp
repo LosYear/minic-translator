@@ -3,7 +3,11 @@
 #include "Translator\Translator.h"
 
 int main() {
-	std::istringstream stream("var");
+	std::istringstream stream("str + str2 +?");
 	Translator translator(stream);
+
+	translator.translate();
+
+	while (true) {};
 	return 0;
 }

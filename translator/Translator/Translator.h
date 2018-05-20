@@ -10,7 +10,7 @@
 
 class Translator {
 public:
-	Translator(std::istream& stream);
+	Translator(std::istream& stream, std::ostream& errStream = std::cerr);
 
 	// Prints atoms list to a stream
 	void printAtoms(std::ostream& stream) const;
@@ -39,6 +39,12 @@ private:
 	LexicalScanner _lexicalAnalyzer;
 	std::unique_ptr<LexicalToken> _currentLexem;
 	unsigned int _currentLabelId;
+
+	// History of last 3 lexems
+	LexemHistory _lexemHistory;
+
+	// Error stream
+	std::ostream& _errStream;
 
 	// Gets next token and writes it to _currentLexem
 	LexicalToken _getNextLexem();

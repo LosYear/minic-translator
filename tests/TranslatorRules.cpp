@@ -7,6 +7,8 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+// @TODO: check bool of translation
+
 namespace tests
 {
 	TEST_CLASS(TranslatorRulesTest)
