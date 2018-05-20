@@ -47,16 +47,21 @@ public:
 		bool operator==(const TableRecord& other);
 	};
 
-	// Inserts new record to the table. Returns index of inserted record (or existing)
-	std::shared_ptr<MemoryOperand> insert(const std::string& name, TableRecord::RecordKind kind = TableRecord::RecordKind::unknown,
-		TableRecord::RecordType type = TableRecord::RecordType::unknown,
-		int len = -1,
-		int init = 0,
-		Scope scope = SymbolTable::GLOBAL_SCOPE,
-		int offset = -1);
+	// Inserts new variable into the table. If var with given name and scope exists, returns nullptr
+	std::shared_ptr<MemoryOperand> insertVar(const std::string& name, const Scope scope,
+		const TableRecord::RecordType type, const unsigned int init = 0);
+
+	// Inserts new function into the table. If var or function with given name exists, returns nullptr
+	std::shared_ptr<MemoryOperand> insertFunc(const std::string& name, const TableRecord::RecordType type, const int len);
+
+	// Find variable in given scope. If there's no var, returns nullptr
+	std::shared_ptr<MemoryOperand> checkVar(const Scope scope, const std::string& name);
+
+	// Checks whether given name is function with given count of arguments
+	std::shared_ptr<MemoryOperand> checkFunc(const std::string& name, const int len);
 
 	// Allocate record for temporary variable
-	std::shared_ptr<MemoryOperand> alloc();
+	std::shared_ptr<MemoryOperand> alloc(Scope scope);
 
 	const TableRecord& operator[](const int index) const;
 	friend std::ostream& operator<<(std::ostream& stream, const SymbolTable& table);
