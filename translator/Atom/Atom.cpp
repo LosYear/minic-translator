@@ -65,3 +65,31 @@ std::string JumpAtom::toString() const
 {
 	return "(JMP, , , " + _label->toString() + ")";
 }
+
+CallAtom::CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result) 
+	: _function(function), _result(result)
+{
+}
+
+std::string CallAtom::toString() const
+{
+	return "(CALL, " + _function->toString() + ", , " + _result->toString() + ")";
+}
+
+RetAtom::RetAtom(const std::shared_ptr<RValue> value) : _value(value)
+{
+}
+
+std::string RetAtom::toString() const
+{
+	return "(RET, , , " + _value->toString() + ")";
+}
+
+ParamAtom::ParamAtom(const std::shared_ptr<RValue> value) : _value(value)
+{
+}
+
+std::string ParamAtom::toString() const
+{
+	return "(PARAM, , , " + _value->toString() + ")";
+}

@@ -64,5 +64,27 @@ namespace tests
 
 			Assert::AreEqual("(LBL, , , lbl`1`)", atom.toString().c_str());
 		}
+
+		TEST_METHOD(CallAtom__Init)
+		{
+			SymbolTable table;
+			CallAtom atom(std::make_shared<MemoryOperand>(1, &table), std::make_shared<MemoryOperand>(2, &table));
+
+			Assert::AreEqual("(CALL, 1, , 2)", atom.toString().c_str());
+		}
+
+		TEST_METHOD(ParamAtom__Init)
+		{
+			ParamAtom atom(std::make_shared<NumberOperand>(1));
+
+			Assert::AreEqual("(PARAM, , , '1')", atom.toString().c_str());
+		}
+
+		TEST_METHOD(RetAtom__Init)
+		{
+			RetAtom atom(std::make_shared<NumberOperand>(1));
+
+			Assert::AreEqual("(RET, , , '1')", atom.toString().c_str());
+		}
 	};
 }

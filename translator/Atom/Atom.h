@@ -102,3 +102,34 @@ public:
 private:
 	const std::shared_ptr<LabelOperand> _label;
 };
+
+// Atom for calling function
+class CallAtom : public Atom {
+public:
+	CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result);
+	std::string toString() const;
+
+private:
+	const std::shared_ptr<MemoryOperand> _function;
+	const std::shared_ptr<MemoryOperand> _result;
+};
+
+// Atom for returning value from function
+class RetAtom : public Atom {
+public:
+	RetAtom(const std::shared_ptr<RValue> value);
+	std::string toString() const;
+
+private:
+	const std::shared_ptr<RValue> _value;
+};
+
+// Atom for creating param
+class ParamAtom : public Atom {
+public:
+	ParamAtom(const std::shared_ptr<RValue> value);
+	std::string toString() const;
+
+private:
+	const std::shared_ptr<RValue> _value;
+};
