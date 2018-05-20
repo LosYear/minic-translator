@@ -71,7 +71,17 @@ std::shared_ptr<RValue> Translator::translateExpresssion()
 std::shared_ptr<RValue> Translator::E1()
 {
 	if (_currentLexem->type() == LexemType::lpar) {
-		throwSyntaxError("Unimplemented feature, E1::lpar rule#24");
+		_getNextLexem();
+
+		std::shared_ptr<RValue> q = E();
+
+		if (!q) {
+			return nullptr; // @todo: syntax error
+		}
+
+		_takeTerm(LexemType::rpar);
+
+		return q;
 	}
 	else if (_currentLexem->type() == LexemType::num || _currentLexem->type() == LexemType::chr) {
 		auto operand = std::make_shared<NumberOperand>(_currentLexem->value());

@@ -9,7 +9,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace tests
 {
-	TEST_CLASS(TranslatorTest)
+	TEST_CLASS(TranslatorRulesTest)
 	{
 	public:
 
@@ -59,7 +59,18 @@ namespace tests
 
 		TEST_METHOD(Translator__E1_lpar)
 		{
-			Assert::IsFalse(true);
+			std::istringstream stream("((var1 || var2) && var3) == (10 + 5)");
+			Translator translator(stream);
+
+			auto result = translator.translateExpresssion();
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 6, ]", result->toString(true).c_str());
+
+			std::ostringstream atoms;
+			translator.printAtoms(atoms);
+
+			Assert::AreEqual("(OR, 0, 1, 2)\n(AND, 2, 3, 4)\n(ADD, '10', '5', 5)\n(MOV, '1', , 6)\n(EQ, 4, 5, lbl`0`)\n(MOV, '0', , 6)\n(LBL, , , lbl`0`)", atoms.str().c_str());
 		}
 
 		TEST_METHOD(Translator__E1_num)
