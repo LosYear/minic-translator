@@ -1,8 +1,8 @@
 #include "Translator.h"
 #include "Exception.h"
 
-Translator::Translator(std::istream & stream, std::ostream& errStream) : _lexicalAnalyzer(LexicalScanner(stream)), _currentLexem(nullptr), 
-_currentLabelId(0), _errStream(errStream) {
+Translator::Translator(std::istream & stream, std::ostream& errStream) : _lexicalAnalyzer(LexicalScanner(stream)), _currentLexem(nullptr),
+_currentLabelId(0), _errStream(errStream), _lexemHistory(LexemHistory(4)) {
 	_getNextLexem();
 }
 
@@ -29,15 +29,22 @@ std::shared_ptr<LabelOperand> Translator::newLabel()
 
 void Translator::throwSyntaxError(const std::string & text) const
 {
-	throw SyntaxError(text);
+	std::string errorMessage = text + "\nAfter lexems:";
+	auto lexems = _lexemHistory.getAll();
+
+	for (unsigned int i = 0; i < lexems.size() - 1; ++i) {
+		errorMessage += " " + lexems[i].toString();
+	}
+
+	throw SyntaxError(errorMessage);
 }
 
 void Translator::throwLexicalError(const std::string & text) const
 {
-	std::string errorMessage = text + "\n After lexems:";
+	std::string errorMessage = text + "\nAfter lexems:";
 	auto lexems = _lexemHistory.getAll();
 
-	for (unsigned int i = 0; i < lexems.size(); ++i) {
+	for (unsigned int i = 0; i < lexems.size() - 1; ++i) {
 		errorMessage += " " + lexems[i].toString();
 	}
 
@@ -51,6 +58,11 @@ bool Translator::translate()
 			return false;
 		}
 
+		// Are any untaken lexems?
+		if (_currentLexem->type() != LexemType::eof) {
+			throwSyntaxError("Excess lexems are left after translation");
+		}
+
 		return true;
 	}
 	catch (const LexicalError& error) {
@@ -58,19 +70,18 @@ bool Translator::translate()
 		return false;
 	}
 	catch (const SyntaxError&  error) {
-
+		_errStream << error.what();
+		return false;
 	}
 }
 
 LexicalToken Translator::_getNextLexem()
 {
 	_currentLexem = std::make_unique<LexicalToken>(_lexicalAnalyzer.getNextToken());
+	_lexemHistory.push(*_currentLexem);
 
 	if (_currentLexem->type() == LexemType::error) {
 		throwLexicalError(_currentLexem->str());
-	}
-	else {
-		_lexemHistory.push(*_currentLexem);
 	}
 
 	return *_currentLexem;
@@ -99,6 +110,7 @@ std::shared_ptr<RValue> Translator::E1()
 		std::shared_ptr<RValue> q = E();
 
 		if (!q) {
+			throwSyntaxError("God knows when it breakes");
 			return nullptr; // @todo: syntax error
 		}
 
@@ -127,11 +139,12 @@ std::shared_ptr<RValue> Translator::E1()
 		const std::string name = _currentLexem->str();
 		_getNextLexem();
 
+		// @TODO: can it break?
 		return E1_(name);
 
 	}
 
-	throwSyntaxError("Unxepected lexem '" + _currentLexem->toString() + "' in expression, , expected ++, (, num, id");
+	throwSyntaxError("Rule #24-28. Unxepected lexem '" + _currentLexem->toString() + "' in expression, expected ++, (, num, id.");
 	return nullptr;
 }
 
@@ -164,7 +177,7 @@ std::shared_ptr<RValue> Translator::E2()
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc();
 
 		if (!q) {
-			// @TODO :: ERROR
+			return nullptr;
 		}
 
 		generateAtom(std::make_unique<UnaryOpAtom>("NOT", q, r));
@@ -180,13 +193,13 @@ std::shared_ptr<RValue> Translator::E3()
 	std::shared_ptr<RValue> q = E2();
 
 	if (!q) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	std::shared_ptr<RValue> s = E3_(q);
 
 	if (!s) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	return s;
@@ -200,7 +213,7 @@ std::shared_ptr<RValue> Translator::E3_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> r = E2();
 
 		if (!r) {
-			return nullptr; // @todo: syntax error
+			return nullptr;
 		}
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
@@ -210,7 +223,7 @@ std::shared_ptr<RValue> Translator::E3_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> t = E3_(s);
 
 		if (!t) {
-			return nullptr; // @Todo: syntax error
+			return nullptr;
 		}
 
 		return t;
@@ -224,13 +237,13 @@ std::shared_ptr<RValue> Translator::E4()
 	std::shared_ptr<RValue> q = E3();
 
 	if (!q) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	std::shared_ptr<RValue> s = E4_(q);
 
 	if (!s) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	return s;
@@ -244,7 +257,7 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> r = E3();
 
 		if (!r) {
-			return nullptr; // @todo: syntax error
+			return nullptr;
 		}
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
@@ -254,7 +267,7 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> t = E4_(s);
 
 		if (!t) {
-			return nullptr; // @Todo: syntax error
+			return nullptr;
 		}
 
 		return t;
@@ -265,7 +278,7 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> r = E3();
 
 		if (!r) {
-			return nullptr; // @todo: syntax error
+			return nullptr;
 		}
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
@@ -275,7 +288,7 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> t = E4_(s);
 
 		if (!t) {
-			return nullptr; // @Todo: syntax error
+			return nullptr;
 		}
 
 		return t;
@@ -289,13 +302,13 @@ std::shared_ptr<RValue> Translator::E5()
 	std::shared_ptr<RValue> q = E4();
 
 	if (!q) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	std::shared_ptr<RValue> s = E5_(q);
 
 	if (!s) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	return s;
@@ -312,7 +325,7 @@ std::shared_ptr<RValue> Translator::E5_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> r = E4();
 
 		if (!r) {
-			return nullptr; // @todo: syntax error
+			return nullptr;
 		}
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
@@ -351,13 +364,13 @@ std::shared_ptr<RValue> Translator::E6()
 	std::shared_ptr<RValue> q = E5();
 
 	if (!q) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	std::shared_ptr<RValue> s = E6_(q);
 
 	if (!s) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	return s;
@@ -371,7 +384,7 @@ std::shared_ptr<RValue> Translator::E6_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> r = E5();
 
 		if (!r) {
-			return nullptr; // @todo: syntax error
+			return nullptr;
 		}
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
@@ -381,7 +394,7 @@ std::shared_ptr<RValue> Translator::E6_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> t = E6_(s);
 
 		if (!t) {
-			return nullptr; //@todo : syntax error
+			return nullptr;
 		}
 
 		return t;
@@ -395,13 +408,13 @@ std::shared_ptr<RValue> Translator::E7()
 	std::shared_ptr<RValue> q = E6();
 
 	if (!q) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	std::shared_ptr<RValue> s = E7_(q);
 
 	if (!s) {
-		return nullptr; // @TODO: syntax error
+		return nullptr;
 	}
 
 	return s;
@@ -415,7 +428,7 @@ std::shared_ptr<RValue> Translator::E7_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> r = E6();
 
 		if (!r) {
-			return nullptr; // @todo: syntax error
+			return nullptr;
 		}
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
@@ -425,7 +438,7 @@ std::shared_ptr<RValue> Translator::E7_(std::shared_ptr<RValue> p)
 		std::shared_ptr<RValue> t = E7_(s);
 
 		if (!t) {
-			return nullptr; //@todo : syntax error
+			return nullptr;
 		}
 
 		return t;

@@ -3,10 +3,10 @@
 #include "Translator\Translator.h"
 
 int main() {
-	std::istringstream stream("str + str2 +?");
+	std::istringstream stream("(a + b + c");
 	Translator translator(stream);
 
-	translator.translate();
+	bool t = translator.translate();
 
 	while (true) {};
 	return 0;

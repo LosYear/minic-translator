@@ -1,5 +1,9 @@
 #include "LexemHistory.h"
 
+LexemHistory::LexemHistory(const unsigned int size) :_size(size)
+{
+}
+
 void LexemHistory::push(LexicalToken _token)
 {
 	if (_list.size() >= _size) {

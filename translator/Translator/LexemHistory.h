@@ -6,6 +6,8 @@
 // Stores last n lexems
 class LexemHistory {
 public:
+	LexemHistory(const unsigned int size = 3);
+
 	// Pushes new lexem and removes one if there's need
 	void push(LexicalToken _token);
 
@@ -16,7 +18,7 @@ public:
 	const std::vector<LexicalToken> getAll() const;
 private:
 	// Max list size
-	const unsigned int _size = 3;
+	const unsigned int _size;
 
 	// Container
 	std::deque<LexicalToken> _list;

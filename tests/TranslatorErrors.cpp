@@ -21,7 +21,7 @@ namespace tests
 
 			translator.translate();
 
-			Assert::AreEqual("Lexical error: Unknown symbol '?'\n After lexems: [opplus] [id, \"str2\"] [opplus]", errors.str().c_str());
+			Assert::AreEqual("Lexical error: Unknown symbol '?'\nAfter lexems: [opplus] [id, \"str2\"] [opplus]", errors.str().c_str());
 		}
 
 		TEST_METHOD(Translator__LexicalException_incompleteAnd)
@@ -33,7 +33,43 @@ namespace tests
 
 			translator.translate();
 
-			Assert::AreEqual("Lexical error: Incomplete AND operator\n After lexems: [id, \"str\"]", errors.str().c_str());
+			Assert::AreEqual("Lexical error: Incomplete AND operator\nAfter lexems: [id, \"str\"]", errors.str().c_str());
+		}
+
+		TEST_METHOD(Translator__SyntaxException_excessLexems)
+		{
+
+			std::istringstream stream("str && str2 str");
+			std::ostringstream errors("");
+			Translator translator(stream, errors);
+
+			translator.translate();
+
+			Assert::AreEqual("Syntax error: Excess lexems are left after translation\nAfter lexems: [id, \"str\"] [opand] [id, \"str2\"]", errors.str().c_str());
+		}
+
+		TEST_METHOD(Translator__SyntaxException_unexceptedEOF)
+		{
+
+			std::istringstream stream("str &&");
+			std::ostringstream errors("");
+			Translator translator(stream, errors);
+
+			translator.translate();
+
+			Assert::AreEqual("Syntax error: Rule #24-28. Unxepected lexem '[eof]' in expression, expected ++, (, num, id.\nAfter lexems: [id, \"str\"] [opand]", errors.str().c_str());
+		}
+
+		TEST_METHOD(Translator__SyntaxException_otherLexemExcepted)
+		{
+
+			std::istringstream stream("(str && str2");
+			std::ostringstream errors("");
+			Translator translator(stream, errors);
+
+			translator.translate();
+
+			Assert::AreEqual("Syntax error: Excepted rpar, got [eof]\nAfter lexems: [id, \"str\"] [opand] [id, \"str2\"]", errors.str().c_str());
 		}
 	};
 }
