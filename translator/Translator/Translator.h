@@ -28,6 +28,9 @@ public:
 
 	// Runs translation
 	bool translate();
+
+	// Translates single expression
+	std::shared_ptr<RValue> translateExpresssion();
 private:
 	std::vector<std::unique_ptr<Atom>> _atoms;
 	StringTable _stringTable;
@@ -43,10 +46,6 @@ private:
 	bool _takeTerm(LexemType type);
 
 	// Recursive descent rules
-
-public:
-	std::shared_ptr<RValue> translateExpresssion();
-
 	std::shared_ptr<RValue> E1();
 	std::shared_ptr<MemoryOperand> E1_(const std::string& p);
 
@@ -63,4 +62,9 @@ public:
 
 	std::shared_ptr<RValue> E6();
 	std::shared_ptr<RValue> E6_(std::shared_ptr<RValue> p);
+
+	std::shared_ptr<RValue> E7();
+	std::shared_ptr<RValue> E7_(std::shared_ptr<RValue> p);
+
+	std::shared_ptr<RValue> E();
 };
