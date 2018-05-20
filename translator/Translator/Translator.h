@@ -45,6 +45,8 @@ private:
 	// Recursive descent rules
 
 public:
+	std::shared_ptr<RValue> translateExpresssion();
+
 	std::shared_ptr<RValue> E1();
 	std::shared_ptr<MemoryOperand> E1_(const std::string& p);
 
@@ -55,4 +57,7 @@ public:
 
 	std::shared_ptr<RValue> E4();
 	std::shared_ptr<RValue> E4_(std::shared_ptr<RValue> p);
+
+	std::shared_ptr<RValue> E5();
+	std::shared_ptr<RValue> E5_(std::shared_ptr<RValue> p);
 };

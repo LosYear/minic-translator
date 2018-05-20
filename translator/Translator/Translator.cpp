@@ -63,6 +63,11 @@ bool Translator::_takeTerm(LexemType type)
 	return true;
 }
 
+std::shared_ptr<RValue> Translator::translateExpresssion()
+{
+	return E5();
+}
+
 std::shared_ptr<RValue> Translator::E1()
 {
 	if (_currentLexem->type() == LexemType::lpar) {
@@ -241,6 +246,67 @@ std::shared_ptr<RValue> Translator::E4_(std::shared_ptr<RValue> p)
 		}
 
 		return t;
+	}
+
+	return p;
+}
+
+std::shared_ptr<RValue> Translator::E5()
+{
+	std::shared_ptr<RValue> q = E4();
+
+	if (!q) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	std::shared_ptr<RValue> s = E5_(q);
+
+	if (!s) {
+		return nullptr; // @TODO: syntax error
+	}
+
+	return s;
+}
+
+std::shared_ptr<RValue> Translator::E5_(std::shared_ptr<RValue> p)
+{
+	if (_currentLexem->type() == LexemType::opeq || _currentLexem->type() == LexemType::opne ||
+		_currentLexem->type() == LexemType::opgt || _currentLexem->type() == LexemType::oplt ||
+		_currentLexem->type() == LexemType::ople) {
+		LexemType currentLexem = _currentLexem->type();
+		_getNextLexem();
+
+		std::shared_ptr<RValue> r = E4();
+
+		if (!r) {
+			return nullptr; // @todo: syntax error
+		}
+
+		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc();
+		std::shared_ptr<LabelOperand> l = newLabel();
+
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(1), s));
+
+		if (currentLexem == LexemType::opeq) {
+			generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, r, l));
+		}
+		else if (currentLexem == LexemType::opne) {
+			generateAtom(std::make_unique<ConditionalJumpAtom>("NE", p, r, l));
+		}
+		else if (currentLexem == LexemType::opgt) {
+			generateAtom(std::make_unique<ConditionalJumpAtom>("GT", p, r, l));
+		}
+		else if (currentLexem == LexemType::oplt) {
+			generateAtom(std::make_unique<ConditionalJumpAtom>("LT", p, r, l));
+		}
+		else if (currentLexem == LexemType::ople) {
+			generateAtom(std::make_unique<ConditionalJumpAtom>("LE", p, r, l));
+		}
+
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(0), s));
+		generateAtom(std::make_unique<LabelAtom>(l));
+
+		return s;
 	}
 
 	return p;
