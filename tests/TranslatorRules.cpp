@@ -67,7 +67,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 6, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 6, [tmp6]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -121,7 +121,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 1, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -148,7 +148,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 1, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result->toString(true).c_str());
 
 
 			std::ostringstream atoms;
@@ -177,7 +177,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -192,7 +192,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -207,7 +207,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 3, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 3, [tmp3]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -224,7 +224,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -239,7 +239,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -254,7 +254,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 3, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 3, [tmp3]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -271,7 +271,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -286,7 +286,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -301,7 +301,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 3, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 3, [tmp3]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -318,7 +318,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -333,7 +333,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -348,7 +348,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 2, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -365,7 +365,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -380,7 +380,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -395,7 +395,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 2, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -412,7 +412,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -427,7 +427,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -442,7 +442,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 2, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -459,7 +459,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -474,7 +474,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -489,7 +489,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 2, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -506,7 +506,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 0, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 0, [tmp0]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -521,7 +521,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 1, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -536,7 +536,7 @@ namespace tests
 			auto result3 = translator3.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 2, ]", result3->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result3->toString(true).c_str());
 
 			std::ostringstream atoms3;
 			translator3.printAtoms(atoms3);
@@ -553,7 +553,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 2, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -568,7 +568,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 4, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 4, [tmp4]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;
@@ -587,7 +587,7 @@ namespace tests
 			auto result = translator.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
-			Assert::AreEqual("[MemOp, 2, ]", result->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 2, [tmp2]]", result->toString(true).c_str());
 
 			std::ostringstream atoms;
 			translator.printAtoms(atoms);
@@ -602,7 +602,7 @@ namespace tests
 			auto result2 = translator2.translateExpresssion();
 
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result2));
-			Assert::AreEqual("[MemOp, 4, ]", result2->toString(true).c_str());
+			Assert::AreEqual("[MemOp, 4, [tmp4]]", result2->toString(true).c_str());
 
 
 			std::ostringstream atoms2;

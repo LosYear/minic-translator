@@ -3,6 +3,7 @@
 #include "SymbolTable\SymbolTable.h"
 #include "Operand\Operand.h"
 #include <string>
+#include <sstream>
 #include <memory>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -61,7 +62,7 @@ namespace tests
 			Assert::IsFalse(rec2 == rec3);
 		}
 
-		TEST_METHOD(SymbolTable__Alloc) 
+		TEST_METHOD(SymbolTable__Alloc)
 		{
 			SymbolTable symbolTable;
 			auto record = symbolTable.alloc();
@@ -69,6 +70,24 @@ namespace tests
 
 			Assert::IsTrue(MemoryOperand(0, &symbolTable) == *record);
 			Assert::IsTrue(MemoryOperand(1, &symbolTable) == *record2);
+		}
+
+		TEST_METHOD(SymbolTable__Print)
+		{
+			SymbolTable symbolTable;
+			auto record = symbolTable.insert("var", SymbolTable::TableRecord::RecordKind::var, SymbolTable::TableRecord::RecordType::integer, -1, 10, 1, 0);
+			auto record2 = symbolTable.insert("func", SymbolTable::TableRecord::RecordKind::func, SymbolTable::TableRecord::RecordType::integer, 0, 0, 5, 0);
+
+			std::ostringstream stream;
+			stream << symbolTable;
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          var        var        integer    -1         10         1          0          \n" +
+				"1          func       func       integer    0          0          5          0          \n";
+
+			Assert::AreEqual(excepted.c_str(), stream.str().c_str());
 		}
 	};
 }
