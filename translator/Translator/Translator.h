@@ -6,6 +6,7 @@
 #include "..\StringTable\StringTable.h"
 #include "..\SymbolTable\SymbolTable.h"
 #include "..\LexicalAnalyzer\Scanner.h"
+#include "LexemHistory.h"
 
 class Translator {
 public:

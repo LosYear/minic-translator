@@ -121,6 +121,7 @@
     <ClCompile Include="Operand\Operand.cpp" />
     <ClCompile Include="StringTable\StringTable.cpp" />
     <ClCompile Include="SymbolTable\SymbolTable.cpp" />
+    <ClCompile Include="Translator\LexemHistory.cpp" />
     <ClCompile Include="Translator\Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +132,7 @@
     <ClInclude Include="StringTable\StringTable.h" />
     <ClInclude Include="SymbolTable\SymbolTable.h" />
     <ClInclude Include="Translator\Exception.h" />
+    <ClInclude Include="Translator\LexemHistory.h" />
     <ClInclude Include="Translator\Translator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -39,6 +39,9 @@
     <ClCompile Include="Translator\Translator.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Translator\LexemHistory.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StringTable\StringTable.h">
@@ -63,6 +66,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Translator\Exception.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Translator\LexemHistory.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
