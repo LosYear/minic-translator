@@ -69,6 +69,16 @@ std::shared_ptr<MemoryOperand> SymbolTable::checkFunc(const std::string & name, 
 	return nullptr;
 }
 
+bool SymbolTable::changeArgsCount(const int index, const int len)
+{
+	if (_records[index].kind != SymbolTable::TableRecord::RecordKind::func) {
+		return false;
+	}
+
+	_records[index].len = len;
+	return true;
+}
+
 std::shared_ptr<MemoryOperand> SymbolTable::alloc(Scope scope)
 {
 	_records.push_back(TableRecord("[tmp" + std::to_string(_records.size()) + "]",

@@ -610,5 +610,82 @@ namespace tests
 
 			Assert::AreEqual("-1 (OR, 0, 1, 2)\n-1 (OR, 2, 3, 4)", atoms2.str().c_str());
 		}
+
+		TEST_METHOD(Translator__DeclareStmt_funcNoArgs) {
+			std::istringstream stream("int n(){}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printSymbolTable(result);
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          n          func       integer    0          0          -1         0          \n";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__DeclareStmt_funcWithArgs) {
+			std::istringstream stream("int n(int b, char c){}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printSymbolTable(result);
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          n          func       integer    2          0          -1         0          \n" +
+				"1          b          var        integer    -1         0          0          0          \n" +
+				"2          c          var        chr        -1         0          0          0          \n";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__DeclareStmt_varWithInit) {
+			std::istringstream stream("int n = 5;");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printSymbolTable(result);
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          n          var        integer    -1         5          -1         0          \n";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__DeclareStmt_varList) {
+			std::istringstream stream("char a, b = 5, c; int k = 10;");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printSymbolTable(result);
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          a          var        chr        -1         0          -1         0          \n" +
+				"1          b          var        chr        -1         5          -1         0          \n" +
+				"2          c          var        chr        -1         0          -1         0          \n" +
+				"3          k          var        integer    -1         10         -1         0          \n";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
 	};
 }

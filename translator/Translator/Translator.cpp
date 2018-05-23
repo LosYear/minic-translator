@@ -21,6 +21,11 @@ void Translator::printAtoms(std::ostream & stream, const unsigned int width) con
 	}
 }
 
+void Translator::printSymbolTable(std::ostream & stream) const
+{
+	stream << _symbolTable;
+}
+
 void Translator::generateAtom(std::unique_ptr<Atom> atom, Scope scope)
 {
 	_atoms[scope].push_back(std::move(atom));
@@ -58,9 +63,7 @@ void Translator::throwLexicalError(const std::string & text) const
 bool Translator::translate()
 {
 	try {
-		if (!E(SymbolTable::GLOBAL_SCOPE)) {
-			return false;
-		}
+		StmtList(SymbolTable::GLOBAL_SCOPE);
 
 		// Are any untaken lexems?
 		if (_currentLexem->type() != LexemType::eof) {
@@ -104,6 +107,31 @@ bool Translator::_takeTerm(LexemType type)
 std::shared_ptr<RValue> Translator::translateExpresssion()
 {
 	return E7(SymbolTable::GLOBAL_SCOPE);
+}
+
+bool Translator::translateExpression(int)
+{
+	try {
+		if (!E(SymbolTable::GLOBAL_SCOPE)) {
+			return false;
+		}
+
+		// Are any untaken lexems?
+		if (_currentLexem->type() != LexemType::eof) {
+			throwSyntaxError("Excess lexems are left after translation");
+		}
+
+		return true;
+	}
+	catch (const LexicalError& error) {
+		_errStream << error.what();
+		return false;
+	}
+	catch (const SyntaxError&  error) {
+		_errStream << error.what();
+		return false;
+	}
+	return false;
 }
 
 std::shared_ptr<RValue> Translator::E1(const Scope context)
@@ -454,4 +482,176 @@ std::shared_ptr<RValue> Translator::E7_(const Scope context, std::shared_ptr<RVa
 std::shared_ptr<RValue> Translator::E(const Scope context)
 {
 	return E7(context);
+}
+
+void Translator::DeclareStmt(const Scope context)
+{
+	SymbolTable::TableRecord::RecordType p = Type();
+
+	if (p == SymbolTable::TableRecord::RecordType::unknown) {
+		throwSyntaxError("Unknown type definition.");
+	}
+
+	const std::string name = _currentLexem->str();
+	_takeTerm(LexemType::id);
+
+	DeclareStmt_(context, p, name);
+}
+
+void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::RecordType p, const std::string & q)
+{
+	if (_currentLexem->type() == LexemType::lpar) {
+		if (context != SymbolTable::GLOBAL_SCOPE) {
+			throwSyntaxError("Function can't be defined inside another function.");
+		}
+		_getNextLexem();
+
+		Scope newContext = _symbolTable.insertFunc(q, p, -1)->index();
+
+		unsigned int n = ParamList(newContext);
+		_symbolTable.changeArgsCount(newContext, n);
+
+		_takeTerm(LexemType::rpar);
+		_takeTerm(LexemType::lbrace);
+
+		StmtList(newContext);
+
+		_takeTerm(LexemType::rbrace);
+
+		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0)), context);
+	}
+	else if (_currentLexem->type() == LexemType::opassign) {
+		_getNextLexem();
+
+		int val = _currentLexem->value();
+
+		_takeTerm(LexemType::num);
+
+		_symbolTable.insertVar(q, context, p, val);
+
+		DeclVarList_(context, p);
+
+		_takeTerm(LexemType::semicolon);
+	}
+	else {
+		_symbolTable.insertVar(q, context, p);
+		DeclVarList_(context, p);
+		_takeTerm(LexemType::semicolon);
+	}
+}
+
+SymbolTable::TableRecord::RecordType Translator::Type()
+{
+	if (_currentLexem->type() == LexemType::kwchar) {
+		_getNextLexem();
+		return SymbolTable::TableRecord::RecordType::chr;
+	}
+	else if (_currentLexem->type() == LexemType::kwint) {
+		_getNextLexem();
+		return SymbolTable::TableRecord::RecordType::integer;
+	}
+
+	return SymbolTable::TableRecord::RecordType::unknown;
+}
+
+void Translator::DeclVarList_(const Scope context, SymbolTable::TableRecord::RecordType p)
+{
+	if (_currentLexem->type() == LexemType::comma) {
+		_getNextLexem();
+
+		const std::string name = _currentLexem->str();
+		_takeTerm(LexemType::id);
+
+		InitVar(context, p, name);
+		DeclVarList_(context, p);
+	}
+
+	return;
+}
+
+void Translator::InitVar(const Scope context, SymbolTable::TableRecord::RecordType p, const std::string & q)
+{
+	if (_currentLexem->type() == LexemType::opassign) {
+		_getNextLexem();
+
+		int val = _currentLexem->value();
+
+		if (_currentLexem->type() != LexemType::num && _currentLexem->type() != LexemType::chr) {
+			throwSyntaxError("Int or char excepted as init value.");
+		}
+
+		_getNextLexem();
+
+		_symbolTable.insertVar(q, context, p, val);
+	}
+	else {
+		_symbolTable.insertVar(q, context, p);
+	}
+}
+
+unsigned int Translator::ParamList(const Scope context)
+{
+	SymbolTable::TableRecord::RecordType q = Type();
+
+	if (q == SymbolTable::TableRecord::RecordType::unknown) {
+		return 0;
+	}
+
+	const std::string name = _currentLexem->str();
+	_takeTerm(LexemType::id);
+
+	_symbolTable.insertVar(name, context, q);
+
+	return ParamList_(context) + 1;
+}
+
+unsigned int Translator::ParamList_(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::comma) {
+		_getNextLexem();
+
+		SymbolTable::TableRecord::RecordType q = Type();
+
+		if (q == SymbolTable::TableRecord::RecordType::unknown) {
+			throwSyntaxError("Unknown type for variable. ");
+		}
+
+		const std::string name = _currentLexem->str();
+		_takeTerm(LexemType::id);
+
+		_symbolTable.insertVar(name, context, q);
+
+		return ParamList_(context) + 1;
+	}
+
+	return 0;
+}
+
+void Translator::StmtList(const Scope context)
+{
+	LexemType type = _currentLexem->type();
+	if (type == LexemType::kwchar || type == LexemType::kwint || type == LexemType::id
+		|| type == LexemType::kwwhile || type == LexemType::kwfor || type == LexemType::kwif
+		|| type == LexemType::kwswitch || type == LexemType::kwin || type == LexemType::kwin
+		|| type == LexemType::kwout || type == LexemType::semicolon || type == LexemType::lbrace
+		|| type == LexemType::kwreturn) {
+		Stmt(context);
+		StmtList(context);
+	}
+}
+
+void Translator::Stmt(const Scope context)
+{
+	LexemType type = _currentLexem->type();
+
+	if (type == LexemType::kwchar || type == LexemType::kwint) {
+		DeclareStmt(context);
+	}
+	else if (type == LexemType::rbrace) {
+
+	}
+	else {
+
+		throwSyntaxError("Forbidden lexem"); //@TODO: CHANGE 
+	}
 }

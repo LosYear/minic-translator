@@ -16,6 +16,9 @@ public:
 	// Prints atoms list to a stream
 	void printAtoms(std::ostream& stream, const unsigned int width = 10) const;
 
+	// Prints symbol table to a stream
+	void printSymbolTable(std::ostream& stream) const;
+
 	// Adds new atom to list of atoms
 	void generateAtom(std::unique_ptr<Atom> atom, Scope scope);
 
@@ -33,6 +36,7 @@ public:
 
 	// Translates single expression
 	std::shared_ptr<RValue> translateExpresssion();
+	bool translateExpression(int);
 private:
 	std::map<Scope, std::vector<std::unique_ptr<Atom>>> _atoms;
 	StringTable _stringTable;
@@ -53,7 +57,7 @@ private:
 	// Checks current token and gets next
 	bool _takeTerm(LexemType type);
 
-	// Recursive descent rules
+	// Recursive descent rules of expressions
 	std::shared_ptr<RValue> E1(const Scope context);
 	std::shared_ptr<MemoryOperand> E1_(const Scope context, const std::string& p);
 
@@ -75,4 +79,20 @@ private:
 	std::shared_ptr<RValue> E7_(const Scope context, std::shared_ptr<RValue> p);
 
 	std::shared_ptr<RValue> E(const Scope context);
+
+	// Recursive descent rules of miniC
+	void DeclareStmt(const Scope context);
+	void DeclareStmt_(const Scope context, SymbolTable::TableRecord::RecordType p, const std::string& q);
+
+	SymbolTable::TableRecord::RecordType Type();
+
+	void DeclVarList_(const Scope context, SymbolTable::TableRecord::RecordType p);
+
+	void InitVar(const Scope context, SymbolTable::TableRecord::RecordType p, const std::string& q);
+
+	unsigned int ParamList(const Scope context);
+	unsigned int ParamList_(const Scope context);
+
+	void StmtList(const Scope context);
+	void Stmt(const Scope context);
 };

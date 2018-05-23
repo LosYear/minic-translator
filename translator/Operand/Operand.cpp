@@ -23,6 +23,11 @@ std::string MemoryOperand::toString(bool expanded) const
 	return str;
 }
 
+const int MemoryOperand::index() const
+{
+	return _index;
+}
+
 bool MemoryOperand::operator==(MemoryOperand & other)
 {
 	return _index == other._index && _symbolTable == other._symbolTable;

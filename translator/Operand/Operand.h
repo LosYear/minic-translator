@@ -22,6 +22,8 @@ public:
 	MemoryOperand(const int index, const SymbolTable* symbolTable);
 	std::string toString(bool expanded = false) const;
 
+	const int index() const;
+
 	bool operator==(MemoryOperand& other);
 private:
 	const int _index;

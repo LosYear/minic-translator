@@ -60,6 +60,9 @@ public:
 	// Checks whether given name is function with given count of arguments
 	std::shared_ptr<MemoryOperand> checkFunc(const std::string& name, const int len);
 
+	// Changes args count for function
+	bool changeArgsCount(const int index, const int len);
+
 	// Allocate record for temporary variable
 	std::shared_ptr<MemoryOperand> alloc(Scope scope);
 
