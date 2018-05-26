@@ -733,7 +733,7 @@ void Translator::Stmt(const Scope context)
 		ForOp(context);
 	}
 	else if (type == LexemType::kwif) {
-		//IfOp(context);
+		IfOp(context);
 	}
 	else if (type == LexemType::kwswitch) {
 		//SwitchOp(context);
@@ -902,5 +902,40 @@ void Translator::ForLoop(const Scope context)
 		std::shared_ptr<MemoryOperand> p = _symbolTable.checkVar(context, name);
 
 		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, std::make_shared<NumberOperand>(1), p), context);
+	}
+}
+
+void Translator::IfOp(const Scope context)
+{
+	_takeTerm(LexemType::kwif);
+	_takeTerm(LexemType::lpar);
+
+	std::shared_ptr<RValue> p = E(context);
+
+	if (!p) {
+		throwSyntaxError("Can't parse if condition.");
+	}
+
+	_takeTerm(LexemType::rpar);
+
+	std::shared_ptr<LabelOperand> l1 = newLabel();
+
+	generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l1), context);
+
+	Stmt(context);
+	std::shared_ptr<LabelOperand> l2 = newLabel();
+	generateAtom(std::make_unique<JumpAtom>(l2), context);
+	generateAtom(std::make_unique<LabelAtom>(l1), context);
+
+	ElsePart(context);
+
+	generateAtom(std::make_unique<LabelAtom>(l2), context);
+}
+
+void Translator::ElsePart(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::kwelse) {
+		_getNextLexem();
+		Stmt(context);
 	}
 }

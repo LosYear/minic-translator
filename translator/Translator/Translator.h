@@ -114,4 +114,7 @@ private:
 	void ForInit(const Scope context);
 	std::shared_ptr<RValue> ForExp(const Scope context);
 	void ForLoop(const Scope context);
+
+	void IfOp(const Scope context);
+	void ElsePart(const Scope context);
 };

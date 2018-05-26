@@ -926,5 +926,42 @@ namespace tests
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
+
+		TEST_METHOD(Translator_IfOp) {
+			std::istringstream stream("int main(){int i; if(i > 5){i = 1;} else {i = 0;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (MOV, '1', , 2)\n0 (GT, 1, '5', lbl`0`)\n0 (MOV, '0', , 2)\n0 (LBL, , , lbl`0`)\n")
+				+ "0 (EQ, 2, '0', lbl`1`)\n0 (MOV, '1', , 1)\n0 (JMP, , , lbl`2`)\n"
+				+ "0 (LBL, , , lbl`1`)\n0 (MOV, '0', , 1)\n0 (LBL, , , lbl`2`)\n"
+				+ "0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+
+		TEST_METHOD(Translator_IfOp_noElse) {
+			std::istringstream stream("int main(){int i; if(i > 5){i = 1;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (MOV, '1', , 2)\n0 (GT, 1, '5', lbl`0`)\n0 (MOV, '0', , 2)\n0 (LBL, , , lbl`0`)\n")
+				+ "0 (EQ, 2, '0', lbl`1`)\n0 (MOV, '1', , 1)\n0 (JMP, , , lbl`2`)\n"
+				+ "0 (LBL, , , lbl`1`)\n0 (LBL, , , lbl`2`)\n"
+				+ "0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
 	};
 }
