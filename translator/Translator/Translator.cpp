@@ -80,6 +80,11 @@ bool Translator::translate()
 			throwSyntaxError("Excess lexems are left after translation");
 		}
 
+		std::shared_ptr<MemoryOperand> m = _symbolTable.checkFunc("main", 0);
+		if (!m) {
+			throwSyntaxError("No entry point for given program");
+		}
+
 		return true;
 	}
 	catch (const LexicalError& error) {

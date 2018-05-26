@@ -79,5 +79,21 @@ namespace tests
 
 			Assert::AreEqual("Syntax error: Excepted rpar, got [eof]\nAfter lexems: [id, \"str\"] [opand] [id, \"str2\"]", errors.str().c_str());
 		}
+
+		TEST_METHOD(Translator__SyntaxException_noMain)
+		{
+
+			std::istringstream stream("int even(){}");
+			std::ostringstream errors("");
+			Translator translator(stream, errors);
+
+			bool translated = translator.translate();
+			Assert::IsFalse(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			Assert::AreEqual("Syntax error: No entry point for given program\nAfter lexems: [rpar] [lbrace] [rbrace]", errors.str().c_str());
+		}
 	};
 }
