@@ -58,6 +58,9 @@ private:
 	bool _takeTerm(LexemType type);
 
 	// Recursive descent rules of expressions
+	unsigned int ArgList(const Scope context);
+	unsigned int ArgList_(const Scope context);
+
 	std::shared_ptr<RValue> E1(const Scope context);
 	std::shared_ptr<MemoryOperand> E1_(const Scope context, const std::string& p);
 
@@ -95,4 +98,8 @@ private:
 
 	void StmtList(const Scope context);
 	void Stmt(const Scope context);
+
+	void AssignOrCallOp(const Scope context);
+	void AssignOrCall(const Scope context);
+	void AssignOrCall_(const Scope context, const std::string& p);
 };

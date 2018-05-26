@@ -104,6 +104,49 @@ bool Translator::_takeTerm(LexemType type)
 	return true;
 }
 
+unsigned int Translator::ArgList(const Scope context)
+{
+
+	if (_currentLexem->type() != LexemType::opinc && _currentLexem->type() != LexemType::lpar &&
+		_currentLexem->type() != LexemType::opnot && _currentLexem->type() != LexemType::num
+		&& _currentLexem->type() != LexemType::id && _currentLexem->type() != LexemType::chr) {
+		return 0;
+	}
+
+	std::shared_ptr<RValue> p = E(context);
+
+	if (!p) {
+		throwSyntaxError("Unknown param format");
+	}
+
+	unsigned int m = ArgList_(context);
+
+	generateAtom(std::make_unique<ParamAtom>(p), context);
+
+	return m + 1;
+}
+
+unsigned int Translator::ArgList_(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::comma) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> p = E(context);
+
+		if (!p) {
+			throwSyntaxError("Unknown param format");
+		}
+
+		unsigned int m = ArgList_(context);
+
+		generateAtom(std::make_unique<ParamAtom>(p), context);
+
+		return m + 1;
+	}
+
+	return 0;
+}
+
 std::shared_ptr<RValue> Translator::translateExpresssion()
 {
 	return E7(SymbolTable::GLOBAL_SCOPE);
@@ -183,7 +226,21 @@ std::shared_ptr<RValue> Translator::E1(const Scope context)
 std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::string& p)
 {
 	if (_currentLexem->type() == LexemType::lpar) {
-		throwSyntaxError("Unimplemented feature, E1_::lpar rule#30");
+		_getNextLexem();
+
+		unsigned int n = ArgList(context);
+
+		_takeTerm(LexemType::rpar);
+
+		std::shared_ptr<MemoryOperand> s = _symbolTable.checkFunc(p, n);
+
+		if (!s) {
+			throwSyntaxError("Undefined function with name " + p);
+		}
+
+		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
+
+		generateAtom(std::make_unique<CallAtom>(s, r), context);
 	}
 	else if (_currentLexem->type() == LexemType::opinc) {
 		_getNextLexem();
@@ -518,7 +575,7 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 
 		_takeTerm(LexemType::rbrace);
 
-		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0)), context);
+		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0)), newContext);
 	}
 	else if (_currentLexem->type() == LexemType::opassign) {
 		_getNextLexem();
@@ -644,14 +701,95 @@ void Translator::Stmt(const Scope context)
 {
 	LexemType type = _currentLexem->type();
 
+	// If operator outside function, throw error
+	if ((type == LexemType::id || type == LexemType::kwwhile || type == LexemType::kwfor ||
+		type == LexemType::kwif || type == LexemType::kwswitch || type == LexemType::kwin ||
+		type == LexemType::kwout || type == LexemType::semicolon || type == LexemType::lbrace ||
+		type == LexemType::kwreturn) && context == SymbolTable::GLOBAL_SCOPE) {
+		throwSyntaxError("Operator can't be defined outside function");
+	}
+
 	if (type == LexemType::kwchar || type == LexemType::kwint) {
 		DeclareStmt(context);
 	}
-	else if (type == LexemType::rbrace) {
+	else if (type == LexemType::id) {
+		AssignOrCallOp(context);
+	}
+	else if (type == LexemType::kwwhile) {
+		//WhileOp(context);
+	}
+	else if (type == LexemType::kwfor) {
+		//ForOp(context);
+	}
+	else if (type == LexemType::kwif) {
+		//IfOp(context);
+	}
+	else if (type == LexemType::kwswitch) {
+		//SwitchOp(context);
+	}
+	else if (type == LexemType::kwin) {
+		//IOp(context);
+	}
+	else if (type == LexemType::kwout) {
+		//OOp(context);
+	}
+	else if (type == LexemType::lbrace) {
+		_getNextLexem();
+		StmtList(context);
+		_takeTerm(LexemType::rbrace);
+	}
+	else if (type == LexemType::kwreturn) {
+
+	}
+	else if (type == LexemType::semicolon) {
 
 	}
 	else {
 
 		throwSyntaxError("Forbidden lexem"); //@TODO: CHANGE 
+	}
+}
+
+void Translator::AssignOrCallOp(const Scope context)
+{
+	AssignOrCall(context);
+	_takeTerm(LexemType::semicolon);
+}
+
+void Translator::AssignOrCall(const Scope context)
+{
+	const std::string name = _currentLexem->str();
+	_takeTerm(LexemType::id);
+	AssignOrCall_(context, name);
+}
+
+void Translator::AssignOrCall_(const Scope context, const std::string & p)
+{
+	if (_currentLexem->type() == LexemType::opassign) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> q = E(context);
+		std::shared_ptr<MemoryOperand> r = _symbolTable.checkVar(context, p);
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", q, r), context);
+	}
+	else if (_currentLexem->type() == LexemType::lpar) {
+		_getNextLexem();
+
+		unsigned int n = ArgList(context);
+		_takeTerm(LexemType::rpar);
+
+		std::shared_ptr<MemoryOperand> q = _symbolTable.checkFunc(p, n);
+
+		if (!q) {
+			throwSyntaxError("Function with name '" + p + "' and len=" + std::to_string(n) + " is not defined");
+		}
+
+		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
+
+		generateAtom(std::make_unique<CallAtom>(q, r), context);
+
+	}
+	else {
+		throwSyntaxError("Unexpected lexem, excepted ( or =");
 	}
 }

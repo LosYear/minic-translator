@@ -170,6 +170,7 @@ namespace tests
 
 		TEST_METHOD(Translator__E3_opmult)
 		{
+			Assert::IsFalse(true);
 			// Case 1
 			std::istringstream stream("2 * 2");
 			Translator translator(stream);
@@ -217,6 +218,7 @@ namespace tests
 
 		TEST_METHOD(Translator__E4_opplus)
 		{
+			Assert::IsTrue(false);
 			// Case 1
 			std::istringstream stream("2 + 2");
 			Translator translator(stream);
@@ -264,6 +266,7 @@ namespace tests
 
 		TEST_METHOD(Translator__E4_opminus)
 		{
+			Assert::IsTrue(false);
 			// Case 1
 			std::istringstream stream("2 - 2");
 			Translator translator(stream);
@@ -686,6 +689,80 @@ namespace tests
 				"3          k          var        integer    -1         10         -1         0          \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__DeclareStmt_insideContext) {
+			std::istringstream stream("int main(){char a, b = 5, c; int k = 10;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printSymbolTable(result);
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          main       func       integer    0          0          -1         0          \n" +
+				"1          a          var        chr        -1         0          0          0          \n" +
+				"2          b          var        chr        -1         5          0          0          \n" +
+				"3          c          var        chr        -1         0          0          0          \n" +
+				"4          k          var        integer    -1         10         0          0          \n";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__AssignOrCallOp_funcCall) {
+			std::istringstream stream("int even(int a){} int main(){even(5);}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 1);
+			
+			std::string excepted = "0 (RET, , , '0')\n2 (PARAM, , , '5')\n2 (CALL, 0, , 3)\n2 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__AssingOrCallOp_funcCallNoParams) {
+			std::istringstream stream("int even(){} int main(){even();}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = "0 (RET, , , '0')\n1 (CALL, 0, , 2)\n1 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__AssignOrCallOp_assign) {
+			std::istringstream stream("int main(){int c; c = 5;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = "0 (MOV, '5', , 1)\n0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__E1_functionCallWithParams) {
+			Assert::IsTrue(false);
+		}
+		TEST_METHOD(Translator__E1_functionCallEmpty) {
+			Assert::IsTrue(false);
 		}
 	};
 }
