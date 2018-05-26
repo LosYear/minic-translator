@@ -3,11 +3,13 @@
 #include "Translator\Translator.h"
 
 int main() {
-	std::istringstream stream("func1()");
+	std::istringstream stream("int main(){int i; for(i = 0; i < 10; ++i){i = i + 0;}}");
 	Translator translator(stream);
-	translator.insertSymbolTableFunc("func1", SymbolTable::TableRecord::RecordType::integer, 0);
 
-	auto result = translator.translateExpresssion();
+	bool translated = translator.translate();
+
+	std::ostringstream result;
+	translator.printAtoms(result, 0);
 
 	while (true) {};
 	return 0;

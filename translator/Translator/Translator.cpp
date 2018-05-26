@@ -730,7 +730,7 @@ void Translator::Stmt(const Scope context)
 		WhileOp(context);
 	}
 	else if (type == LexemType::kwfor) {
-		//ForOp(context);
+		ForOp(context);
 	}
 	else if (type == LexemType::kwif) {
 		//IfOp(context);
@@ -830,4 +830,77 @@ void Translator::WhileOp(const Scope context)
 	generateAtom(std::make_unique<JumpAtom>(l1), context);
 	generateAtom(std::make_unique<LabelAtom>(l2), context);
 
+}
+
+void Translator::ForOp(const Scope context)
+{
+	_takeTerm(LexemType::kwfor);
+	_takeTerm(LexemType::lpar);
+
+	ForInit(context);
+
+	_takeTerm(LexemType::semicolon);
+
+	std::shared_ptr<LabelOperand> l1 = newLabel();
+	generateAtom(std::make_unique<LabelAtom>(l1), context);
+
+	std::shared_ptr<RValue> p = ForExp(context);
+	if (!p) {
+		throwSyntaxError("Can't parse for condition. ");
+	}
+
+	_takeTerm(LexemType::semicolon);
+
+	std::shared_ptr<LabelOperand> l2 = newLabel();
+	std::shared_ptr<LabelOperand> l3 = newLabel();
+	std::shared_ptr<LabelOperand> l4 = newLabel();
+
+	generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l4), context);
+	generateAtom(std::make_unique<JumpAtom>(l3), context);
+	generateAtom(std::make_unique<LabelAtom>(l2), context);
+
+	ForLoop(context);
+	generateAtom(std::make_unique<JumpAtom>(l1), context);
+	
+	_takeTerm(LexemType::rpar);
+
+	generateAtom(std::make_unique<LabelAtom>(l3), context);
+
+	Stmt(context);
+
+	generateAtom(std::make_unique<JumpAtom>(l2), context);
+	generateAtom(std::make_unique<LabelAtom>(l4), context);
+}
+
+void Translator::ForInit(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::id) {
+		AssignOrCall(context);
+	}
+}
+
+std::shared_ptr<RValue> Translator::ForExp(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::opinc || _currentLexem->type() == LexemType::lpar || _currentLexem->type() == LexemType::opnot
+		|| _currentLexem->type() == LexemType::num || _currentLexem->type() == LexemType::id || _currentLexem->type() == LexemType::chr) {
+		return E(context);
+	}
+	return std::make_shared<NumberOperand>(1);
+}
+
+void Translator::ForLoop(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::id) {
+		AssignOrCall(context);
+	}
+	else if (_currentLexem->type() == LexemType::opinc) {
+		_getNextLexem();
+
+		const std::string name = _currentLexem->str();
+		_takeTerm(LexemType::id);
+
+		std::shared_ptr<MemoryOperand> p = _symbolTable.checkVar(context, name);
+
+		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, std::make_shared<NumberOperand>(1), p), context);
+	}
 }

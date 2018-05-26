@@ -109,4 +109,9 @@ private:
 	void AssignOrCall_(const Scope context, const std::string& p);
 
 	void WhileOp(const Scope context);
+
+	void ForOp(const Scope context);
+	void ForInit(const Scope context);
+	std::shared_ptr<RValue> ForExp(const Scope context);
+	void ForLoop(const Scope context);
 };

@@ -594,7 +594,7 @@ namespace tests
 
 			Assert::AreEqual("-1 (AND, 0, 1, 2)", atoms.str().c_str());
 
-			
+
 			// Case 2
 			std::istringstream stream2("var1 && var2 && var3");
 			Translator translator2(stream2);
@@ -811,7 +811,7 @@ namespace tests
 				"0 (LBL, , , lbl`1`)\n0 (EQ, 2, '0', lbl`2`)\n0 (ADD, 1, '1', 3)\n0 (MOV, 3, , 1)\n0 (JMP, , , lbl`0`)\n" +
 				"0 (LBL, , , lbl`2`)\n0 (RET, , , '0')";
 
-				Assert::AreEqual(excepted.c_str(), result.str().c_str());
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
 
 		TEST_METHOD(Translator__E1_functionCallWithParams) {
@@ -839,6 +839,92 @@ namespace tests
 			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
 			Assert::AreEqual("[MemOp, 1, [tmp1]]", result->toString(true).c_str());
 			Assert::AreEqual("-1 (CALL, 0, , 1)", atoms.str().c_str());
+		}
+
+		TEST_METHOD(Translator_ForOp_emptyInit) {
+			std::istringstream stream("int main(){int i; for(; i < 10; ++i){i = i + 0;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (LBL, , , lbl`0`)\n")
+				+ "0 (MOV, '1', , 2)\n0 (LT, 1, '10', lbl`1`)\n0 (MOV, '0', , 2)\n0 (LBL, , , lbl`1`)\n"
+				+ "0 (EQ, 2, '0', lbl`4`)\n0 (JMP, , , lbl`3`)\n0 (LBL, , , lbl`2`)\n"
+				+ "0 (ADD, 1, '1', 1)\n"
+				+ "0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`3`)\n"
+				+ "0 (ADD, 1, '0', 3)\n0 (MOV, 3, , 1)\n"
+				+ "0 (JMP, , , lbl`2`)\n0 (LBL, , , lbl`4`)\n"
+				+ "0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator_ForOp_emptyCond) {
+			std::istringstream stream("int main(){int i; for(i = 0; ; ++i){i = i + 0;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (MOV, '0', , 1)\n0 (LBL, , , lbl`0`)\n")
+				+ "0 (EQ, '1', '0', lbl`3`)\n0 (JMP, , , lbl`2`)\n0 (LBL, , , lbl`1`)\n"
+				+ "0 (ADD, 1, '1', 1)\n"
+				+ "0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`2`)\n"
+				+ "0 (ADD, 1, '0', 2)\n0 (MOV, 2, , 1)\n"
+				+ "0 (JMP, , , lbl`1`)\n0 (LBL, , , lbl`3`)\n"
+				+ "0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator_ForOp_emptyExpr) {
+			std::istringstream stream("int main(){int i; for(i = 0; i < 10;){i = i + 0;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (MOV, '0', , 1)\n0 (LBL, , , lbl`0`)\n")
+				+ "0 (MOV, '1', , 2)\n0 (LT, 1, '10', lbl`1`)\n0 (MOV, '0', , 2)\n0 (LBL, , , lbl`1`)\n"
+				+ "0 (EQ, 2, '0', lbl`4`)\n0 (JMP, , , lbl`3`)\n0 (LBL, , , lbl`2`)\n"
+				+ "0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`3`)\n"
+				+ "0 (ADD, 1, '0', 3)\n0 (MOV, 3, , 1)\n"
+				+ "0 (JMP, , , lbl`2`)\n0 (LBL, , , lbl`4`)\n"
+				+ "0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator_ForOp) {
+			std::istringstream stream("int main(){int i; for(i = 0; i < 10; ++i){i = i + 0;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (MOV, '0', , 1)\n0 (LBL, , , lbl`0`)\n")
+				+ "0 (MOV, '1', , 2)\n0 (LT, 1, '10', lbl`1`)\n0 (MOV, '0', , 2)\n0 (LBL, , , lbl`1`)\n"
+				+ "0 (EQ, 2, '0', lbl`4`)\n0 (JMP, , , lbl`3`)\n0 (LBL, , , lbl`2`)\n"
+				+ "0 (ADD, 1, '1', 1)\n"
+				+ "0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`3`)\n"
+				+ "0 (ADD, 1, '0', 3)\n0 (MOV, 3, , 1)\n"
+				+ "0 (JMP, , , lbl`2`)\n0 (LBL, , , lbl`4`)\n"
+				+ "0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
 	};
 }
