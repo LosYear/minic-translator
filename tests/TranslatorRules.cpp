@@ -63,6 +63,9 @@ namespace tests
 		{
 			std::istringstream stream("((var1 || var2) && var3) == (10 + 5)");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var1", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("var3", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -72,7 +75,7 @@ namespace tests
 			std::ostringstream atoms;
 			translator.printAtoms(atoms, 2);
 
-			Assert::AreEqual("-1 (OR, 0, 1, 2)\n-1 (AND, 2, 3, 4)\n-1 (ADD, '10', '5', 5)\n-1 (MOV, '1', , 6)\n-1 (EQ, 4, 5, lbl`0`)\n-1 (MOV, '0', , 6)\n-1 (LBL, , , lbl`0`)", atoms.str().c_str());
+			Assert::AreEqual("-1 (OR, 0, 1, 3)\n-1 (AND, 3, 2, 4)\n-1 (ADD, '10', '5', 5)\n-1 (MOV, '1', , 6)\n-1 (EQ, 4, 5, lbl`0`)\n-1 (MOV, '0', , 6)\n-1 (LBL, , , lbl`0`)", atoms.str().c_str());
 		}
 
 		TEST_METHOD(Translator__E1_num)
@@ -101,6 +104,7 @@ namespace tests
 		{
 			std::istringstream stream("++var");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -117,6 +121,7 @@ namespace tests
 		{
 			std::istringstream stream("var++");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -133,6 +138,7 @@ namespace tests
 		{
 			std::istringstream stream("var");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -144,6 +150,7 @@ namespace tests
 		{
 			std::istringstream stream("!var");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -161,6 +168,7 @@ namespace tests
 		{
 			std::istringstream stream("var");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -170,7 +178,6 @@ namespace tests
 
 		TEST_METHOD(Translator__E3_opmult)
 		{
-			Assert::IsFalse(true);
 			// Case 1
 			std::istringstream stream("2 * 2");
 			Translator translator(stream);
@@ -189,6 +196,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var * 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -204,6 +212,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var * var2 * var");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -218,7 +228,6 @@ namespace tests
 
 		TEST_METHOD(Translator__E4_opplus)
 		{
-			Assert::IsTrue(false);
 			// Case 1
 			std::istringstream stream("2 + 2");
 			Translator translator(stream);
@@ -237,6 +246,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var + 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -252,6 +262,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var + var2 + var");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -266,7 +278,6 @@ namespace tests
 
 		TEST_METHOD(Translator__E4_opminus)
 		{
-			Assert::IsTrue(false);
 			// Case 1
 			std::istringstream stream("2 - 2");
 			Translator translator(stream);
@@ -285,6 +296,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var - 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -300,6 +312,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var - var2 - var");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -332,6 +346,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var == 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -347,6 +362,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var == var2");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -379,6 +396,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var != 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -394,6 +412,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var != var2");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -426,6 +446,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var > 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -441,6 +462,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var > var2");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -473,6 +496,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var < 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -488,6 +512,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var < var2");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -520,6 +546,7 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var <= 2");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -535,6 +562,8 @@ namespace tests
 			// Case 3
 			std::istringstream stream3("var <= var2");
 			Translator translator3(stream3);
+			translator3.insertSymbolTableVar("var", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator3.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result3 = translator3.translateExpresssion();
 
@@ -552,6 +581,8 @@ namespace tests
 			// Case 1
 			std::istringstream stream("var1 && var2");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var1", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -563,10 +594,13 @@ namespace tests
 
 			Assert::AreEqual("-1 (AND, 0, 1, 2)", atoms.str().c_str());
 
-
+			
 			// Case 2
 			std::istringstream stream2("var1 && var2 && var3");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var1", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator2.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator2.insertSymbolTableVar("var3", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -577,7 +611,7 @@ namespace tests
 			std::ostringstream atoms2;
 			translator2.printAtoms(atoms2, 2);
 
-			Assert::AreEqual("-1 (AND, 0, 1, 2)\n-1 (AND, 2, 3, 4)", atoms2.str().c_str());
+			Assert::AreEqual("-1 (AND, 0, 1, 3)\n-1 (AND, 3, 2, 4)", atoms2.str().c_str());
 		}
 
 
@@ -586,6 +620,8 @@ namespace tests
 			// Case 1
 			std::istringstream stream("var1 || var2");
 			Translator translator(stream);
+			translator.insertSymbolTableVar("var1", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result = translator.translateExpresssion();
 
@@ -601,6 +637,9 @@ namespace tests
 			// Case 2
 			std::istringstream stream2("var1 || var2 || var3");
 			Translator translator2(stream2);
+			translator2.insertSymbolTableVar("var1", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator2.insertSymbolTableVar("var2", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator2.insertSymbolTableVar("var3", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			auto result2 = translator2.translateExpresssion();
 
@@ -611,7 +650,7 @@ namespace tests
 			std::ostringstream atoms2;
 			translator2.printAtoms(atoms2, 2);
 
-			Assert::AreEqual("-1 (OR, 0, 1, 2)\n-1 (OR, 2, 3, 4)", atoms2.str().c_str());
+			Assert::AreEqual("-1 (OR, 0, 1, 3)\n-1 (OR, 3, 2, 4)", atoms2.str().c_str());
 		}
 
 		TEST_METHOD(Translator__DeclareStmt_funcNoArgs) {
@@ -722,7 +761,7 @@ namespace tests
 
 			std::ostringstream result;
 			translator.printAtoms(result, 1);
-			
+
 			std::string excepted = "0 (RET, , , '0')\n2 (PARAM, , , '5')\n2 (CALL, 0, , 3)\n2 (RET, , , '0')";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
@@ -758,11 +797,48 @@ namespace tests
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
 
+		TEST_METHOD(Translator__WhileOp) {
+			std::istringstream stream("int main(){int i = 0; while(i != 5){i = i + 1;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (LBL, , , lbl`0`)\n0 (MOV, '1', , 2)\n0 (NE, 1, '5', lbl`1`)\n0 (MOV, '0', , 2)\n") +
+				"0 (LBL, , , lbl`1`)\n0 (EQ, 2, '0', lbl`2`)\n0 (ADD, 1, '1', 3)\n0 (MOV, 3, , 1)\n0 (JMP, , , lbl`0`)\n" +
+				"0 (LBL, , , lbl`2`)\n0 (RET, , , '0')";
+
+				Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
 		TEST_METHOD(Translator__E1_functionCallWithParams) {
-			Assert::IsTrue(false);
+			std::istringstream stream("func1(5)");
+			Translator translator(stream);
+			translator.insertSymbolTableFunc("func1", SymbolTable::TableRecord::RecordType::integer, 1);
+
+			auto result = translator.translateExpresssion();
+			std::ostringstream atoms;
+			translator.printAtoms(atoms, 0);
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result->toString(true).c_str());
+			Assert::AreEqual("-1 (PARAM, , , '5')\n-1 (CALL, 0, , 1)", atoms.str().c_str());
 		}
 		TEST_METHOD(Translator__E1_functionCallEmpty) {
-			Assert::IsTrue(false);
+			std::istringstream stream("func1()");
+			Translator translator(stream);
+			translator.insertSymbolTableFunc("func1", SymbolTable::TableRecord::RecordType::integer, 0);
+
+			auto result = translator.translateExpresssion();
+			std::ostringstream atoms;
+			translator.printAtoms(atoms, 0);
+
+			Assert::IsTrue(typeid(MemoryOperand) == typeid(*result));
+			Assert::AreEqual("[MemOp, 1, [tmp1]]", result->toString(true).c_str());
+			Assert::AreEqual("-1 (CALL, 0, , 1)", atoms.str().c_str());
 		}
 	};
 }

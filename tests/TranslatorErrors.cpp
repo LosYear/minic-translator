@@ -18,6 +18,8 @@ namespace tests
 			std::istringstream stream("str + str2 +?");
 			std::ostringstream errors("");
 			Translator translator(stream, errors);
+			translator.insertSymbolTableVar("str", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("str2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			translator.translateExpression(0);
 
@@ -42,6 +44,8 @@ namespace tests
 			std::istringstream stream("str && str2 str");
 			std::ostringstream errors("");
 			Translator translator(stream, errors);
+			translator.insertSymbolTableVar("str", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("str2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			translator.translateExpression(0);
 
@@ -54,6 +58,8 @@ namespace tests
 			std::istringstream stream("str &&");
 			std::ostringstream errors("");
 			Translator translator(stream, errors);
+			translator.insertSymbolTableVar("str", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("str2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			translator.translateExpression(0);
 
@@ -66,6 +72,8 @@ namespace tests
 			std::istringstream stream("(str && str2");
 			std::ostringstream errors("");
 			Translator translator(stream, errors);
+			translator.insertSymbolTableVar("str", -1, SymbolTable::TableRecord::RecordType::integer);
+			translator.insertSymbolTableVar("str2", -1, SymbolTable::TableRecord::RecordType::integer);
 
 			translator.translateExpression(0);
 

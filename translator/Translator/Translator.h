@@ -22,6 +22,11 @@ public:
 	// Adds new atom to list of atoms
 	void generateAtom(std::unique_ptr<Atom> atom, Scope scope);
 
+	// Inserts record to symbol table
+	std::shared_ptr<MemoryOperand> insertSymbolTableVar(const std::string& name, const Scope scope,
+		const SymbolTable::TableRecord::RecordType type, const unsigned int init = 0);
+	std::shared_ptr<MemoryOperand> insertSymbolTableFunc(const std::string& name, const SymbolTable::TableRecord::RecordType type, const int len);
+
 	// Generates new label
 	std::shared_ptr<LabelOperand> newLabel();
 
@@ -102,4 +107,6 @@ private:
 	void AssignOrCallOp(const Scope context);
 	void AssignOrCall(const Scope context);
 	void AssignOrCall_(const Scope context, const std::string& p);
+
+	void WhileOp(const Scope context);
 };

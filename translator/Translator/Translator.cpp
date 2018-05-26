@@ -31,6 +31,16 @@ void Translator::generateAtom(std::unique_ptr<Atom> atom, Scope scope)
 	_atoms[scope].push_back(std::move(atom));
 }
 
+std::shared_ptr<MemoryOperand> Translator::insertSymbolTableVar(const std::string & name, const Scope scope, const SymbolTable::TableRecord::RecordType type, const unsigned int init)
+{
+	return _symbolTable.insertVar(name, scope, type, init);
+}
+
+std::shared_ptr<MemoryOperand> Translator::insertSymbolTableFunc(const std::string & name, const SymbolTable::TableRecord::RecordType type, const int len)
+{
+	return _symbolTable.insertFunc(name, type, len);
+}
+
 std::shared_ptr<LabelOperand> Translator::newLabel()
 {
 	return std::make_shared<LabelOperand>(_currentLabelId++);
@@ -202,7 +212,7 @@ std::shared_ptr<RValue> Translator::E1(const Scope context)
 	else if (_currentLexem->type() == LexemType::opinc) {
 		_getNextLexem();
 
-		std::shared_ptr<MemoryOperand> q = _symbolTable.insertVar(_currentLexem->str(), context, SymbolTable::TableRecord::RecordType::unknown); // @TODO: replace with checkVar
+		std::shared_ptr<MemoryOperand> q = _symbolTable.checkVar(context, _currentLexem->str()); // @TODO: replace with checkVar
 
 		generateAtom(std::make_unique<BinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q), context);
 
@@ -241,11 +251,12 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::s
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
 		generateAtom(std::make_unique<CallAtom>(s, r), context);
+		return r;
 	}
 	else if (_currentLexem->type() == LexemType::opinc) {
 		_getNextLexem();
 
-		std::shared_ptr<MemoryOperand> s = _symbolTable.insertVar(p, context, SymbolTable::TableRecord::RecordType::unknown); // @Todo:: replace with checkVar
+		std::shared_ptr<MemoryOperand> s = _symbolTable.checkVar(context, p); // @Todo:: replace with checkVar
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
 		generateAtom(std::make_unique<UnaryOpAtom>("MOV", s, r), context);
@@ -254,7 +265,7 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::s
 		return r;
 	}
 
-	return _symbolTable.insertVar(p, context, SymbolTable::TableRecord::RecordType::unknown); // @TODO: replace with checkVar
+	return _symbolTable.checkVar(context, p); // @TODO: replace with checkVar
 }
 
 std::shared_ptr<RValue> Translator::E2(const Scope context)
@@ -716,7 +727,7 @@ void Translator::Stmt(const Scope context)
 		AssignOrCallOp(context);
 	}
 	else if (type == LexemType::kwwhile) {
-		//WhileOp(context);
+		WhileOp(context);
 	}
 	else if (type == LexemType::kwfor) {
 		//ForOp(context);
@@ -792,4 +803,31 @@ void Translator::AssignOrCall_(const Scope context, const std::string & p)
 	else {
 		throwSyntaxError("Unexpected lexem, excepted ( or =");
 	}
+}
+
+void Translator::WhileOp(const Scope context)
+{
+	_takeTerm(LexemType::kwwhile);
+
+	std::shared_ptr<LabelOperand> l1 = newLabel();
+
+	generateAtom(std::make_unique<LabelAtom>(l1), context);
+
+	_takeTerm(LexemType::lpar);
+
+	std::shared_ptr<RValue> p = E(context);
+	if (!p) {
+		throwSyntaxError("Can't parse while condition");
+	}
+
+	_takeTerm(LexemType::rpar);
+
+	std::shared_ptr<LabelOperand> l2 = newLabel();
+	generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l2), context);
+
+	Stmt(context);
+
+	generateAtom(std::make_unique<JumpAtom>(l1), context);
+	generateAtom(std::make_unique<LabelAtom>(l2), context);
+
 }
