@@ -184,7 +184,6 @@ bool Translator::translateExpression(int)
 		_errStream << error.what();
 		return false;
 	}
-	return false;
 }
 
 std::shared_ptr<RValue> Translator::E1(const Scope context)
@@ -736,13 +735,14 @@ void Translator::Stmt(const Scope context)
 		IfOp(context);
 	}
 	else if (type == LexemType::kwswitch) {
+		throwSyntaxError("unimplemented switch feature");
 		//SwitchOp(context);
 	}
 	else if (type == LexemType::kwin) {
-		//IOp(context);
+		IOp(context);
 	}
 	else if (type == LexemType::kwout) {
-		//OOp(context);
+		OOp(context);
 	}
 	else if (type == LexemType::lbrace) {
 		_getNextLexem();
@@ -750,10 +750,18 @@ void Translator::Stmt(const Scope context)
 		_takeTerm(LexemType::rbrace);
 	}
 	else if (type == LexemType::kwreturn) {
+		_getNextLexem();
+		std::shared_ptr<RValue> p = E(context);
 
+		if (!p) {
+			throwSyntaxError("Can't parse return value");
+		}
+
+		generateAtom(std::make_unique<RetAtom>(p), context);
+		_takeTerm(LexemType::semicolon);
 	}
 	else if (type == LexemType::semicolon) {
-
+		_getNextLexem();
 	}
 	else {
 
@@ -937,5 +945,84 @@ void Translator::ElsePart(const Scope context)
 	if (_currentLexem->type() == LexemType::kwelse) {
 		_getNextLexem();
 		Stmt(context);
+	}
+}
+
+void Translator::SwitchOp(const Scope context)
+{
+	_takeTerm(LexemType::kwswitch);
+	_takeTerm(LexemType::lpar);
+
+	std::shared_ptr<RValue> p = E(context);
+	if (!p) {
+		throwSyntaxError("Can't parse switch expression");
+	}
+
+	_takeTerm(LexemType::rpar);
+	_takeTerm(LexemType::lbrace);
+
+	std::shared_ptr<LabelOperand> end = newLabel();
+	Cases(context, p, end);
+
+	_takeTerm(LexemType::rbrace);
+	generateAtom(std::make_unique<LabelAtom>(end), context);
+}
+
+void Translator::Cases(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end)
+{
+	//ACase(context, p, end, def);
+//	Cases_(context, p, end, def);
+}
+
+void Translator::Cases_(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end, std::shared_ptr<LabelOperand> def)
+{
+	/*if (_currentLexem->type() == LexemType::kwcase || _curentLexem->type() == kwdefault) {
+
+	}
+	else {
+		std::shared_ptr<LabelOperand> q = end;
+		if (def != nullptr) {
+			q = def;
+		}
+
+		generateAtom(std::make_unique<JumpAtom>(q), context);
+	}*/
+}
+
+void Translator::IOp(const Scope context)
+{
+	_takeTerm(LexemType::kwin);
+
+	const std::string name = _currentLexem->str();
+	_takeTerm(LexemType::id);
+	_takeTerm(LexemType::semicolon);
+
+	std::shared_ptr<MemoryOperand> p = _symbolTable.checkVar(context, name);
+
+	generateAtom(std::make_unique<InAtom>(p), context);
+}
+
+void Translator::OOp(const Scope context)
+{
+	_takeTerm(LexemType::kwout);
+	OOp_(context);
+	_takeTerm(LexemType::semicolon);
+}
+
+void Translator::OOp_(const Scope context)
+{
+	if (_currentLexem->type() == LexemType::str) {
+		const std::string s = _currentLexem->str();
+		_takeTerm(LexemType::str);
+
+		generateAtom(std::make_unique<OutAtom>(_stringTable.insert(s)), context);
+	}
+	else {
+		std::shared_ptr<RValue> p = E(context);
+		if (!p) {
+			throwSyntaxError("Can't parse out value");
+		}
+
+		generateAtom(std::make_unique<OutAtom>(p), context);
 	}
 }

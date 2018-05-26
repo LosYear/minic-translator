@@ -963,5 +963,66 @@ namespace tests
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
+
+		TEST_METHOD(Translator__Stmt_return) {
+			std::istringstream stream("int main(){return 1;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (RET, , , '1')\n0 (RET, , , '0')");
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__IOp) {
+			std::istringstream stream("int main(){int i = 0; in i;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (IN, , , 1)\n0 (RET, , , '0')");
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__OOp_value) {
+			std::istringstream stream("int main(){int i = 0; out i + 1;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (ADD, 1, '1', 2)\n0 (OUT, , , 2)\n0 (RET, , , '0')");
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+
+		}
+
+		TEST_METHOD(Translator__OOp_str) {
+			std::istringstream stream("int main(){int i = 0; out \"HELLO\";}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (OUT, , , str`0`)\n0 (RET, , , '0')");
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
 	};
 }

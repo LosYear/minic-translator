@@ -117,4 +117,13 @@ private:
 
 	void IfOp(const Scope context);
 	void ElsePart(const Scope context);
+
+	void SwitchOp(const Scope context);
+	void Cases(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end);
+	void Cases_(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end, std::shared_ptr<LabelOperand> def);
+	std::shared_ptr<LabelOperand> ACase(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end, std::shared_ptr<LabelOperand> def);
+
+	void IOp(const Scope context);
+	void OOp(const Scope context);
+	void OOp_(const Scope context);
 };
