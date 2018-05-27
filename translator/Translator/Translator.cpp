@@ -26,6 +26,11 @@ void Translator::printSymbolTable(std::ostream & stream) const
 	stream << _symbolTable;
 }
 
+void Translator::printStringTable(std::ostream & stream) const
+{
+	stream << _stringTable;
+}
+
 void Translator::generateAtom(std::unique_ptr<Atom> atom, Scope scope)
 {
 	_atoms[scope].push_back(std::move(atom));
@@ -1037,6 +1042,7 @@ std::shared_ptr<LabelOperand> Translator::ACase(const Scope context, std::shared
 	}
 	else {
 		throwSyntaxError("Excepted case or default. ");
+		return nullptr;
 	}
 }
 

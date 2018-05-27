@@ -19,6 +19,7 @@ const std::string& StringTable::operator[](const int index) const {
 }
 
 std::ostream& operator<<(std::ostream& stream, const StringTable& table) {
+	stream << std::left << "STRING TABLE:" << std::endl;
 	for (unsigned int i = 0; i < table._strings.size(); ++i) {
 		stream << i << " " << table._strings[i];
 

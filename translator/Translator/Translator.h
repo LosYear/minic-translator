@@ -19,6 +19,9 @@ public:
 	// Prints symbol table to a stream
 	void printSymbolTable(std::ostream& stream) const;
 
+	// Prints string table to a stream
+	void printStringTable(std::ostream& stream) const;
+
 	// Adds new atom to list of atoms
 	void generateAtom(std::unique_ptr<Atom> atom, Scope scope);
 
