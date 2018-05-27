@@ -41,6 +41,7 @@ private:
 	{ "else", LexemType::kwelse },
 	{ "switch", LexemType::kwswitch },
 	{ "case", LexemType::kwcase },
+	{ "default", LexemType::kwdefault },
 	{ "while", LexemType::kwwhile },
 	{ "for", LexemType::kwfor },
 	{ "return", LexemType::kwreturn },

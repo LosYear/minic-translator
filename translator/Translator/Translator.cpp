@@ -740,8 +740,7 @@ void Translator::Stmt(const Scope context)
 		IfOp(context);
 	}
 	else if (type == LexemType::kwswitch) {
-		throwSyntaxError("unimplemented switch feature");
-		//SwitchOp(context);
+		SwitchOp(context);
 	}
 	else if (type == LexemType::kwin) {
 		IOp(context);
@@ -874,7 +873,7 @@ void Translator::ForOp(const Scope context)
 
 	ForLoop(context);
 	generateAtom(std::make_unique<JumpAtom>(l1), context);
-	
+
 	_takeTerm(LexemType::rpar);
 
 	generateAtom(std::make_unique<LabelAtom>(l3), context);
@@ -975,14 +974,22 @@ void Translator::SwitchOp(const Scope context)
 
 void Translator::Cases(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end)
 {
-	//ACase(context, p, end, def);
-//	Cases_(context, p, end, def);
+	std::shared_ptr<LabelOperand> def1 = ACase(context, p, end);
+	Cases_(context, p, end, def1);
 }
 
 void Translator::Cases_(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end, std::shared_ptr<LabelOperand> def)
 {
-	/*if (_currentLexem->type() == LexemType::kwcase || _curentLexem->type() == kwdefault) {
+	if (_currentLexem->type() == LexemType::kwcase || _currentLexem->type() == LexemType::kwdefault) {
+		std::shared_ptr<LabelOperand> def1 = ACase(context, p, end);
+		
+		if (def != nullptr && def1 != nullptr) {
+			throwSyntaxError("There can't be more than ONE default section in case.");
+		}
+		
+		std::shared_ptr<LabelOperand> def2 = (def != nullptr) ? def : def1;
 
+		Cases_(context, p, end, def2);
 	}
 	else {
 		std::shared_ptr<LabelOperand> q = end;
@@ -991,7 +998,46 @@ void Translator::Cases_(const Scope context, std::shared_ptr<RValue> p, std::sha
 		}
 
 		generateAtom(std::make_unique<JumpAtom>(q), context);
-	}*/
+	}
+}
+
+std::shared_ptr<LabelOperand> Translator::ACase(const Scope context, std::shared_ptr<RValue> p, std::shared_ptr<LabelOperand> end)
+{
+	if (_currentLexem->type() == LexemType::kwcase) {
+		_getNextLexem();
+		int val = _currentLexem->value();
+		_takeTerm(LexemType::num);
+
+		std::shared_ptr<LabelOperand> next = newLabel();
+		generateAtom(std::make_unique<ConditionalJumpAtom>("NE", p, std::make_shared<NumberOperand>(val), next), context);
+
+		_takeTerm(LexemType::colon);
+		Stmt(context);
+
+		generateAtom(std::make_unique<JumpAtom>(end), context);
+		generateAtom(std::make_unique<LabelAtom>(next), context);
+
+		return nullptr;
+	}
+	else if (_currentLexem->type() == LexemType::kwdefault) {
+		_getNextLexem();
+		_takeTerm(LexemType::colon);
+
+		std::shared_ptr<LabelOperand> next = newLabel();
+		std::shared_ptr<LabelOperand> def = newLabel();
+		generateAtom(std::make_unique<JumpAtom>(next), context);
+		generateAtom(std::make_unique<LabelAtom>(def), context);
+
+		Stmt(context);
+
+		generateAtom(std::make_unique<JumpAtom>(end), context);
+		generateAtom(std::make_unique<LabelAtom>(next), context);
+
+		return def;
+	}
+	else {
+		throwSyntaxError("Excepted case or default. ");
+	}
 }
 
 void Translator::IOp(const Scope context)

@@ -1028,5 +1028,43 @@ namespace tests
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
+
+		TEST_METHOD(Translator__CaseOp) {
+			std::istringstream stream("int main(){int i; switch(i){case 0: i = 1; case 1: i = 2; default: i = -1; case 2: i = 3;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (NE, 1, '0', lbl`1`)\n0 (MOV, '1', , 1)\n0 (JMP, , , lbl`0`)\n") +
+				"0 (LBL, , , lbl`1`)\n0 (NE, 1, '1', lbl`2`)\n0 (MOV, '2', , 1)\n0 (JMP, , , lbl`0`)\n" +
+				"0 (LBL, , , lbl`2`)\n0 (JMP, , , lbl`3`)\n0 (LBL, , , lbl`4`)\n0 (MOV, '-1', , 1)\n" +
+				"0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`3`)\n0 (NE, 1, '2', lbl`5`)\n0 (MOV, '3', , 1)\n" +
+				"0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`5`)\n0 (JMP, , , lbl`4`)\n0 (LBL, , , lbl`0`)\n0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Translator__CaseOp_noDefault) {
+			std::istringstream stream("int main(){int i; switch(i){case 0: i = 1; case 1: i = 2; case 2: i = 3;}}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = std::string("0 (NE, 1, '0', lbl`1`)\n0 (MOV, '1', , 1)\n0 (JMP, , , lbl`0`)\n") +
+				"0 (LBL, , , lbl`1`)\n0 (NE, 1, '1', lbl`2`)\n0 (MOV, '2', , 1)\n0 (JMP, , , lbl`0`)\n" +
+				"0 (LBL, , , lbl`2`)\n" +
+				"0 (NE, 1, '2', lbl`3`)\n0 (MOV, '3', , 1)\n" +
+				"0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`3`)\n0 (JMP, , , lbl`0`)\n0 (LBL, , , lbl`0`)\n0 (RET, , , '0')";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
 	};
 }

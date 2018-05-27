@@ -95,5 +95,19 @@ namespace tests
 
 			Assert::AreEqual("Syntax error: No entry point for given program\nAfter lexems: [rpar] [lbrace] [rbrace]", errors.str().c_str());
 		}
+
+		TEST_METHOD(Translator__SyntaxError_doubleDefault) {
+			std::istringstream stream("int main(){int i; switch(i){case 0: i = 1; case 1: i = 2; default: return 1; case 2: i = 3; default: return 0;}}");
+			std::ostringstream errors("");
+			Translator translator(stream, errors);
+
+			bool translated = translator.translate();
+			Assert::IsFalse(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			Assert::AreEqual("Syntax error: There can't be more than ONE default section in case.\nAfter lexems: [kwreturn] [num, 0] [semicolon]", errors.str().c_str());
+		}
 	};
 }

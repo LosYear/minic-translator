@@ -214,11 +214,11 @@ namespace Tests
 		}
 
 		TEST_METHOD(LexicalScanner__Keywords) {
-			std::istringstream input("int char if else switch case while for return in out");
+			std::istringstream input("int char if else switch case while for return in out default");
 			LexicalScanner scanner(input);
 			std::vector<LexemType> excepted = { LexemType::kwint, LexemType::kwchar, LexemType::kwif,
 				LexemType::kwelse, LexemType::kwswitch, LexemType::kwcase, LexemType::kwwhile,
-				LexemType::kwfor, LexemType::kwreturn, LexemType::kwin, LexemType::kwout
+				LexemType::kwfor, LexemType::kwreturn, LexemType::kwin, LexemType::kwout, LexemType::kwdefault
 			};
 			LexemType* current = &excepted[0];
 			std::unique_ptr<LexicalToken> token;
