@@ -170,5 +170,15 @@ namespace tests
 
 			Assert::AreEqual("LBL0: ", stream.str().c_str());
 		}
+
+		TEST_METHOD(Code__JMP) {
+			LabelOperand label(0);
+
+			JumpAtom atom(std::make_shared<LabelOperand>(label));
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (JMP, , , lbl`0`)\nJMP LBL0\n", stream.str().c_str());
+		}
 	};
 }

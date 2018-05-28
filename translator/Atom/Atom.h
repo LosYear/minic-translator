@@ -139,7 +139,7 @@ public:
 	JumpAtom(const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<LabelOperand> _label;

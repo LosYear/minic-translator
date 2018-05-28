@@ -98,6 +98,12 @@ std::string JumpAtom::toString() const
 	return "(JMP, , , " + _label->toString() + ")";
 }
 
+void JumpAtom::generate(std::ostream & stream) const
+{
+	stream << "; " << toString() << std::endl;
+	stream << "JMP LBL" << _label->id() << std::endl;
+}
+
 CallAtom::CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result) 
 	: _function(function), _result(result)
 {
