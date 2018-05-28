@@ -57,6 +57,7 @@ class StringOperand : public Operand {
 public:
 	StringOperand(const int index, const StringTable* stringTable);
 	std::string toString(bool expanded = false) const;
+	const int index() const;
 
 	bool operator==(StringOperand& other);
 private:

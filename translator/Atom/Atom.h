@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include "..\Operand\Operand.h"
+#include "typeinfo"
 
 // Base class for all atoms
 class Atom {
@@ -101,7 +102,7 @@ public:
 	OutAtom(const std::shared_ptr<Operand> value);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<Operand> _value;
@@ -113,7 +114,7 @@ public:
 	InAtom(const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<MemoryOperand> _result;

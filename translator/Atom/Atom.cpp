@@ -83,6 +83,22 @@ std::string OutAtom::toString() const
 	return "(OUT, , , " + _value->toString() + ")";
 }
 
+void OutAtom::generate(std::ostream & stream) const
+{
+	stream << "; " << toString() << std::endl;
+	RValue* value = dynamic_cast<RValue*>(_value.get());
+	if (value != nullptr) {
+		value->load(stream);
+		stream << "OUT 1" << std::endl;
+
+	}
+	else if(typeid(*_value) == typeid(StringOperand)) {
+		StringOperand* str = dynamic_cast<StringOperand*>(_value.get());
+		stream << "LXI A, str" << str->index() << std::endl;
+		stream << "CALL @PRINT" << std::endl;
+	}
+}
+
 InAtom::InAtom(const std::shared_ptr<MemoryOperand> result) : _result(result)
 {
 }
@@ -90,6 +106,13 @@ InAtom::InAtom(const std::shared_ptr<MemoryOperand> result) : _result(result)
 std::string InAtom::toString() const
 {
 	return "(IN, , , " + _result->toString() + ")";
+}
+
+void InAtom::generate(std::ostream & stream) const
+{
+	stream << "; " << toString() << std::endl;
+	stream << "IN 0" << std::endl;
+	_result->save(stream);
 }
 
 LabelAtom::LabelAtom(const std::shared_ptr<LabelOperand> label) : _label(label)

@@ -75,6 +75,31 @@ namespace tests
 			Assert::AreEqual("; (NOT, 0, , 2)\nLDA VAR0\nCMA\nSTA VAR2\n", stream.str().c_str());
 		}
 
+		TEST_METHOD(Code__OUT_str) {
+			StringTable table;
+			std::shared_ptr<StringOperand> record = table.insert("TEST");
+
+			OutAtom atom(record);
+
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (OUT, , , str`0`)\nLXI A, str0\nCALL @PRINT\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(Code__OUT_value) {
+			StringTable table;
+			std::shared_ptr<NumberOperand> a = std::make_shared<NumberOperand>(5);
+
+			OutAtom atom(a);
+
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (OUT, , , '5')\nMVI A, 5\nOUT 1\n", stream.str().c_str());
+		}
+
+
 		TEST_METHOD(Code__ADD)
 		{
 			SymbolTable table;
@@ -203,6 +228,17 @@ namespace tests
 			atom.generate(stream);
 
 			Assert::AreEqual("; (JMP, , , lbl`0`)\nJMP LBL0\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(CODE__IN) {
+			SymbolTable table;
+			auto left = table.insertVar("a", -1, SymbolTable::TableRecord::RecordType::integer);
+
+			InAtom atom(left);
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (IN, , , 0)\nIN 0\nSTA VAR0\n", stream.str().c_str());
 		}
 	};
 }

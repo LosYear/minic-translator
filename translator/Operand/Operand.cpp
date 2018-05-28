@@ -92,6 +92,11 @@ std::string StringOperand::toString(bool expanded) const
 	return str;
 }
 
+const int StringOperand::index() const
+{
+	return _index;
+}
+
 std::string LabelOperand::toString(bool expanded) const
 {
 	if (!expanded) {
