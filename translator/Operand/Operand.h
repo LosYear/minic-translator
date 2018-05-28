@@ -70,6 +70,7 @@ class LabelOperand : public Operand {
 public:
 	LabelOperand(const int labelID);
 	std::string toString(bool expanded = false) const;
+	int id() const;
 private:
 	int _id;
 };

@@ -225,7 +225,7 @@ std::shared_ptr<RValue> Translator::E1(const Scope context)
 
 		std::shared_ptr<MemoryOperand> q = _symbolTable.checkVar(context, _currentLexem->str()); // @TODO: replace with checkVar
 
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("ADD", q, std::make_shared<NumberOperand>(1), q), context);
 
 		_getNextLexem();
 
@@ -271,7 +271,7 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::s
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
 		generateAtom(std::make_unique<UnaryOpAtom>("MOV", s, r), context);
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s), context);
 
 		return r;
 	}
@@ -329,7 +329,7 @@ std::shared_ptr<RValue> Translator::E3_(const Scope context, std::shared_ptr<RVa
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("MUL", p, r, s), context);
+		generateAtom(std::make_unique<FnBinaryOpAtom>("MUL", p, r, s), context);
 
 		std::shared_ptr<RValue> t = E3_(context, s);
 
@@ -373,7 +373,7 @@ std::shared_ptr<RValue> Translator::E4_(const Scope context, std::shared_ptr<RVa
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, r, s), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("ADD", p, r, s), context);
 
 		std::shared_ptr<RValue> t = E4_(context, s);
 
@@ -394,7 +394,7 @@ std::shared_ptr<RValue> Translator::E4_(const Scope context, std::shared_ptr<RVa
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("SUB", p, r, s), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("SUB", p, r, s), context);
 
 		std::shared_ptr<RValue> t = E4_(context, s);
 
@@ -445,19 +445,19 @@ std::shared_ptr<RValue> Translator::E5_(const Scope context, std::shared_ptr<RVa
 		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(1), s), context);
 
 		if (currentLexem == LexemType::opeq) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, r, l), context);
+			generateAtom(std::make_unique<SimpleConditionalJumpAtom>("EQ", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::opne) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("NE", p, r, l), context);
+			generateAtom(std::make_unique<SimpleConditionalJumpAtom>("NE", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::opgt) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("GT", p, r, l), context);
+			generateAtom(std::make_unique<SimpleConditionalJumpAtom>("GT", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::oplt) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("LT", p, r, l), context);
+			generateAtom(std::make_unique<SimpleConditionalJumpAtom>("LT", p, r, l), context);
 		}
 		else if (currentLexem == LexemType::ople) {
-			generateAtom(std::make_unique<ConditionalJumpAtom>("LE", p, r, l), context);
+			generateAtom(std::make_unique<ComplexConditinalJumpAtom>("LE", p, r, l), context);
 		}
 
 		generateAtom(std::make_unique<UnaryOpAtom>("MOV", std::make_shared<NumberOperand>(0), s), context);
@@ -500,7 +500,7 @@ std::shared_ptr<RValue> Translator::E6_(const Scope context, std::shared_ptr<RVa
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("AND", p, r, s), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("AND", p, r, s), context);
 
 		std::shared_ptr<RValue> t = E6_(context, s);
 
@@ -544,7 +544,7 @@ std::shared_ptr<RValue> Translator::E7_(const Scope context, std::shared_ptr<RVa
 
 		std::shared_ptr<MemoryOperand> s = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("OR", p, r, s), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("OR", p, r, s), context);
 
 		std::shared_ptr<RValue> t = E7_(context, s);
 
@@ -842,7 +842,7 @@ void Translator::WhileOp(const Scope context)
 	_takeTerm(LexemType::rpar);
 
 	std::shared_ptr<LabelOperand> l2 = newLabel();
-	generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l2), context);
+	generateAtom(std::make_unique<SimpleConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l2), context);
 
 	Stmt(context);
 
@@ -874,7 +874,7 @@ void Translator::ForOp(const Scope context)
 	std::shared_ptr<LabelOperand> l3 = newLabel();
 	std::shared_ptr<LabelOperand> l4 = newLabel();
 
-	generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l4), context);
+	generateAtom(std::make_unique<SimpleConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l4), context);
 	generateAtom(std::make_unique<JumpAtom>(l3), context);
 	generateAtom(std::make_unique<LabelAtom>(l2), context);
 
@@ -920,7 +920,7 @@ void Translator::ForLoop(const Scope context)
 
 		std::shared_ptr<MemoryOperand> p = _symbolTable.checkVar(context, name);
 
-		generateAtom(std::make_unique<BinaryOpAtom>("ADD", p, std::make_shared<NumberOperand>(1), p), context);
+		generateAtom(std::make_unique<SimpleBinaryOpAtom>("ADD", p, std::make_shared<NumberOperand>(1), p), context);
 	}
 }
 
@@ -939,7 +939,7 @@ void Translator::IfOp(const Scope context)
 
 	std::shared_ptr<LabelOperand> l1 = newLabel();
 
-	generateAtom(std::make_unique<ConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l1), context);
+	generateAtom(std::make_unique<SimpleConditionalJumpAtom>("EQ", p, std::make_shared<NumberOperand>(0), l1), context);
 
 	Stmt(context);
 	std::shared_ptr<LabelOperand> l2 = newLabel();
@@ -1016,7 +1016,7 @@ std::shared_ptr<LabelOperand> Translator::ACase(const Scope context, std::shared
 		_takeTerm(LexemType::num);
 
 		std::shared_ptr<LabelOperand> next = newLabel();
-		generateAtom(std::make_unique<ConditionalJumpAtom>("NE", p, std::make_shared<NumberOperand>(val), next), context);
+		generateAtom(std::make_unique<SimpleConditionalJumpAtom>("NE", p, std::make_shared<NumberOperand>(val), next), context);
 
 		_takeTerm(LexemType::colon);
 		Stmt(context);

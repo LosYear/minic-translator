@@ -7,6 +7,7 @@
 class Atom {
 public:
 	virtual std::string toString() const = 0;
+	virtual void generate(std::ostream& stream) const = 0;
 };
 
 
@@ -17,14 +18,29 @@ public:
 		const std::shared_ptr<RValue> right, const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
 
-private:
-	// Operation name, e.g. ADD
-	const std::string _name;
+	void generate(std::ostream& stream) const;
 
+private:
 	const std::shared_ptr<RValue> _left;
 	const std::shared_ptr<RValue> _right;
 
 	const std::shared_ptr<MemoryOperand> _result;
+protected:
+	virtual void _generateOperation(std::ostream& stream) const = 0;
+	// Operation name, e.g. ADD
+	const std::string _name;
+};
+
+class SimpleBinaryOpAtom : public BinaryOpAtom {
+	using BinaryOpAtom::BinaryOpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
+};
+
+class FnBinaryOpAtom : public BinaryOpAtom {
+	using BinaryOpAtom::BinaryOpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
 };
 
 
@@ -34,6 +50,8 @@ public:
 	UnaryOpAtom(const std::string& name, const std::shared_ptr<RValue> operand,
 		const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const {};
 
 private:
 	// Operation name, e.g. NEG
@@ -51,14 +69,30 @@ public:
 		const std::shared_ptr<RValue> right, const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
-private:
-	// e.g. EQ
-	const std::string _condition;
+	void generate(std::ostream& stream) const;
 
+private:
 	const std::shared_ptr<RValue> _left;
 	const std::shared_ptr<RValue> _right;
 
+protected:
+	// e.g. EQ
+	const std::string _condition;
 	const std::shared_ptr<LabelOperand> _label;
+
+	virtual void _generateOperation(std::ostream& stream) const = 0;
+};
+
+class SimpleConditionalJumpAtom : public ConditionalJumpAtom {
+	using ConditionalJumpAtom::ConditionalJumpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
+};
+
+class ComplexConditinalJumpAtom : public ConditionalJumpAtom {
+	using ConditionalJumpAtom::ConditionalJumpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
 };
 
 
@@ -66,6 +100,8 @@ class OutAtom : public Atom {
 public:
 	OutAtom(const std::shared_ptr<Operand> value);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const {};
 
 private:
 	const std::shared_ptr<Operand> _value;
@@ -76,6 +112,8 @@ class InAtom : public Atom {
 public:
 	InAtom(const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const {};
 
 private:
 	const std::shared_ptr<MemoryOperand> _result;
@@ -88,6 +126,8 @@ public:
 	LabelAtom(const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
+	void generate(std::ostream& stream) const;
+
 private:
 	const std::shared_ptr<LabelOperand> _label;
 };
@@ -99,6 +139,8 @@ public:
 	JumpAtom(const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
+	void generate(std::ostream& stream) const {};
+
 private:
 	const std::shared_ptr<LabelOperand> _label;
 };
@@ -108,6 +150,8 @@ class CallAtom : public Atom {
 public:
 	CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const {};
 
 private:
 	const std::shared_ptr<MemoryOperand> _function;
@@ -120,6 +164,8 @@ public:
 	RetAtom(const std::shared_ptr<RValue> value);
 	std::string toString() const;
 
+	void generate(std::ostream& stream) const {};
+
 private:
 	const std::shared_ptr<RValue> _value;
 };
@@ -129,6 +175,8 @@ class ParamAtom : public Atom {
 public:
 	ParamAtom(const std::shared_ptr<RValue> value);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const {};
 
 private:
 	const std::shared_ptr<RValue> _value;

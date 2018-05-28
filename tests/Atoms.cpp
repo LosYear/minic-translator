@@ -18,7 +18,7 @@ namespace tests
 			SymbolTable table;
 			std::shared_ptr<NumberOperand> left = std::make_shared<NumberOperand>(2);
 			std::shared_ptr<NumberOperand> right = std::make_shared<NumberOperand>(4);
-			BinaryOpAtom atom("ADD", left, right, table.insertVar("test", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer));
+			SimpleBinaryOpAtom atom("ADD", left, right, table.insertVar("test", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer));
 
 			Assert::AreEqual("(ADD, '2', '4', 0)", atom.toString().c_str());
 		}
@@ -37,7 +37,7 @@ namespace tests
 			SymbolTable table;
 			auto op1 = table.insertVar("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
 			auto op2 = table.insertVar("b", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
-			ConditionalJumpAtom atom("EQ", op1, op2, std::make_shared<LabelOperand>(3));
+			SimpleConditionalJumpAtom atom("EQ", op1, op2, std::make_shared<LabelOperand>(3));
 
 			Assert::AreEqual("(EQ, 0, 1, lbl`3`)", atom.toString().c_str());
 		}

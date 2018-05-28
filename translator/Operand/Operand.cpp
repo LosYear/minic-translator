@@ -101,3 +101,8 @@ std::string LabelOperand::toString(bool expanded) const
 	std::string str = "[LblOp, " + std::to_string(_id) + "]";
 	return str;
 }
+
+int LabelOperand::id() const
+{
+	return _id;
+}

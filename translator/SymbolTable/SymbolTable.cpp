@@ -135,7 +135,7 @@ void SymbolTable::calculateOffset()
 
 void SymbolTable::generateGlobalsSection(std::ostream & stream) const
 {
-	for (int i = 0; i < _records.size(); ++i) {
+	for (unsigned int i = 0; i < _records.size(); ++i) {
 		if (_records[i].scope == SymbolTable::GLOBAL_SCOPE) {
 			stream << "var" << i << ": DB " << _records[i].init << std::endl;
 		}
