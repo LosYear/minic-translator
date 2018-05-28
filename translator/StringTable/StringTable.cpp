@@ -14,6 +14,13 @@ std::shared_ptr<StringOperand> StringTable::insert(const std::string& str)
 	return std::make_shared<StringOperand>(_strings.size() - 1, this);
 }
 
+void StringTable::generateGlobalsSection(std::ostream & stream) const
+{
+	for (int i = 0; i < _strings.size(); ++i) {
+		stream << "str" << i << ": DB '" << _strings[i] << "', 0" << std::endl;
+	}
+}
+
 const std::string& StringTable::operator[](const int index) const {
 	return _strings[index];
 }

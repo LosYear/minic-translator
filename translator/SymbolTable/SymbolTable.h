@@ -72,6 +72,9 @@ public:
 	// Recalculates offset for all symbol table
 	void calculateOffset();
 
+	// Generates global section with vars init
+	void generateGlobalsSection(std::ostream& stream) const;
+
 	// Returns names all of functions in string table
 	std::vector<std::string> functionNames() const;
 

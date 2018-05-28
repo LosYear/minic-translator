@@ -110,7 +110,7 @@ void SymbolTable::calculateOffset()
 		if (it->kind == TableRecord::RecordKind::var && it->scope != SymbolTable::GLOBAL_SCOPE) {
 			unsigned int n = _records[it->scope].len;
 			unsigned int m = getLocalsCount(it->scope);
-			
+
 			unsigned int j = 1;
 
 			if (counts.find(it->scope) != counts.end()) {
@@ -129,6 +129,15 @@ void SymbolTable::calculateOffset()
 			unsigned int n = _records[i].len;
 			unsigned int m = getLocalsCount(i);
 			it->offset = 2 * (m + n + 1);
+		}
+	}
+}
+
+void SymbolTable::generateGlobalsSection(std::ostream & stream) const
+{
+	for (int i = 0; i < _records.size(); ++i) {
+		if (_records[i].scope == SymbolTable::GLOBAL_SCOPE) {
+			stream << "var" << i << ": DB " << _records[i].init << std::endl;
 		}
 	}
 }

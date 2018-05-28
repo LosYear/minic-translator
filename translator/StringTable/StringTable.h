@@ -10,6 +10,9 @@ public:
 	// Inserts new string to the table. Returns index of inserted string (or existing)
 	std::shared_ptr<StringOperand> insert(const std::string& str);
 
+	// Generates globals section with i8080 init code
+	void generateGlobalsSection(std::ostream& stream) const;
+
 	const std::string& operator[](const int index) const;
 	friend std::ostream& operator<<(std::ostream& stream, const StringTable& table);
 private:

@@ -44,5 +44,59 @@ namespace tests
 			LabelOperand lblOp(14);
 			Assert::AreEqual("[LblOp, 14]", lblOp.toString(true).c_str());
 		}
+
+		TEST_METHOD(NumberOperand__load) {
+			std::ostringstream stream;
+			NumberOperand numOp(14);
+			numOp.load(stream);
+
+			Assert::AreEqual("MVI A, 14\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(MemoryOperand__loadLocal) {
+			SymbolTable symbolTable;
+			symbolTable.insertFunc("main", SymbolTable::TableRecord::RecordType::integer, 0);
+			symbolTable.insertVar("a", 1, SymbolTable::TableRecord::RecordType::integer);
+
+			MemoryOperand memOp(1, &symbolTable);
+			std::ostringstream stream;
+			memOp.load(stream);
+
+			Assert::AreEqual("LXI H, 0\nDAD SP\nMOV A, M\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(MemoryOperand__loadGlobal) {
+			SymbolTable symbolTable;
+			symbolTable.insertVar("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+
+			MemoryOperand memOp(0, &symbolTable);
+			std::ostringstream stream;
+			memOp.load(stream);
+
+			Assert::AreEqual("LDA VAR0\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(MemoryOperand__saveLocal) {
+			SymbolTable symbolTable;
+			symbolTable.insertFunc("main", SymbolTable::TableRecord::RecordType::integer, 0);
+			symbolTable.insertVar("a", 1, SymbolTable::TableRecord::RecordType::integer);
+
+			MemoryOperand memOp(1, &symbolTable);
+			std::ostringstream stream;
+			memOp.save(stream);
+
+			Assert::AreEqual("LXI H, 0\nDAD SP\nMOV M, A\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(MemoryOperand__saveGlobal) {
+			SymbolTable symbolTable;
+			symbolTable.insertVar("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+
+			MemoryOperand memOp(0, &symbolTable);
+			std::ostringstream stream;
+			memOp.save(stream);
+
+			Assert::AreEqual("STA VAR0\n", stream.str().c_str());
+		}
 	};
 }

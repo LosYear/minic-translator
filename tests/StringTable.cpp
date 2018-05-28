@@ -65,5 +65,17 @@ namespace tests
 
 			Assert::AreEqual(excepted.c_str(), stream.str().c_str());
 		}
+
+		TEST_METHOD(StringTable__generateGlobals) {
+			std::ostringstream stream;
+			StringTable table;
+
+			table.insert("First");
+			table.insert("Second");
+			table.insert("Third");
+			table.generateGlobalsSection(stream);
+
+			Assert::AreEqual("str0: DB 'First', 0\nstr1: DB 'Second', 0\nstr2: DB 'Third', 0\n", stream.str().c_str());
+		}
 	};
 }

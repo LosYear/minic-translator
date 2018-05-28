@@ -1085,3 +1085,19 @@ void Translator::OOp_(const Scope context)
 		generateAtom(std::make_unique<OutAtom>(p), context);
 	}
 }
+
+void Translator::_saveRegs(std::ostream & stream) const
+{
+	stream << "PUSH PSW" << std::endl;
+	stream << "PUSH B" << std::endl;
+	stream << "PUSH D" << std::endl;
+	stream << "PUSH H" << std::endl;
+}
+
+void Translator::_loadRegs(std::ostream & stream) const
+{
+	stream << "POP H" << std::endl;
+	stream << "POP D" << std::endl;
+	stream << "POP B" << std::endl;
+	stream << "POP PSW" << std::endl;
+}

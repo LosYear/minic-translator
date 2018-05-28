@@ -129,4 +129,10 @@ private:
 	void IOp(const Scope context);
 	void OOp(const Scope context);
 	void OOp_(const Scope context);
+
+	// Generates code for pushing regs to stack
+	void _saveRegs(std::ostream& stream) const;
+
+	// Generates code for poping all regs from stack
+	void _loadRegs(std::ostream& stream) const;
 };

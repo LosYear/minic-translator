@@ -170,5 +170,18 @@ namespace tests
 
 			Assert::AreEqual(excepted.c_str(), stream.str().c_str());
 		}
+
+		TEST_METHOD(SymbolTable__generateGlobals) {
+			std::ostringstream stream;
+			SymbolTable table;
+
+			table.insertVar("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+			table.insertVar("c", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+			table.insertVar("b", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+			table.insertVar("b", 4, SymbolTable::TableRecord::RecordType::integer);
+			table.generateGlobalsSection(stream);
+
+			Assert::AreEqual("var0: DB 10\nvar1: DB 0\nvar2: DB 0\n", stream.str().c_str());
+		}
 	};
 }
