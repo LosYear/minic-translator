@@ -51,7 +51,7 @@ public:
 		const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	// Operation name, e.g. NEG

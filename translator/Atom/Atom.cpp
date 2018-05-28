@@ -34,6 +34,23 @@ std::string UnaryOpAtom::toString() const
 	return "(" + _name + ", " + _operand->toString() + ", , " + _result->toString() + ")";
 }
 
+void UnaryOpAtom::generate(std::ostream & stream) const
+{
+	stream << "; " << toString() << std::endl;
+	if (_name == "MOV") {
+		_operand->load(stream);
+		_result->save(stream);
+	}
+	else if (_name == "NOT") {
+		_operand->load(stream);
+		stream << "CMA" << std::endl;
+		_result->save(stream);
+	}
+	else {
+		stream << "ERROR: UNKNOWN " << _name << std::endl;
+	}
+}
+
 ConditionalJumpAtom::ConditionalJumpAtom(const std::string& cond, const std::shared_ptr<RValue> left, const std::shared_ptr<RValue> right, const std::shared_ptr<LabelOperand> label) :
 	_condition(cond), _left(left), _right(right), _label(label)
 {

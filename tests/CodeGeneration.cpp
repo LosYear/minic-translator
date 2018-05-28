@@ -48,7 +48,31 @@ namespace tests
 		TEST_METHOD(Code__MOV)
 		{
 
-			Assert::IsFalse(true);
+			SymbolTable table;
+			auto left = table.insertVar("a", -1, SymbolTable::TableRecord::RecordType::integer);
+			auto right = table.insertVar("b", -1, SymbolTable::TableRecord::RecordType::integer);
+			auto res = table.insertVar("c", -1, SymbolTable::TableRecord::RecordType::integer);
+
+			UnaryOpAtom atom("MOV", left, res);
+
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (MOV, 0, , 2)\nLDA VAR0\nSTA VAR2\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(Code__NOT) {
+			SymbolTable table;
+			auto left = table.insertVar("a", -1, SymbolTable::TableRecord::RecordType::integer);
+			auto right = table.insertVar("b", -1, SymbolTable::TableRecord::RecordType::integer);
+			auto res = table.insertVar("c", -1, SymbolTable::TableRecord::RecordType::integer);
+
+			UnaryOpAtom atom("NOT", left, res);
+
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (NOT, 0, , 2)\nLDA VAR0\nCMA\nSTA VAR2\n", stream.str().c_str());
 		}
 
 		TEST_METHOD(Code__ADD)
