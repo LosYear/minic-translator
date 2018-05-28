@@ -82,7 +82,8 @@ namespace tests
 
 		TEST_METHOD(RetAtom__Init)
 		{
-			RetAtom atom(std::make_shared<NumberOperand>(1));
+			SymbolTable table;
+			RetAtom atom(std::make_shared<NumberOperand>(1), -1, table);
 
 			Assert::AreEqual("(RET, , , '1')", atom.toString().c_str());
 		}

@@ -597,7 +597,7 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 
 		_takeTerm(LexemType::rbrace);
 
-		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0)), newContext);
+		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0), context, _symbolTable), newContext);
 	}
 	else if (_currentLexem->type() == LexemType::opassign) {
 		_getNextLexem();
@@ -768,7 +768,7 @@ void Translator::Stmt(const Scope context)
 			throwSyntaxError("Can't parse return value");
 		}
 
-		generateAtom(std::make_unique<RetAtom>(p), context);
+		generateAtom(std::make_unique<RetAtom>(p, context, _symbolTable), context);
 		_takeTerm(LexemType::semicolon);
 	}
 	else if (type == LexemType::semicolon) {

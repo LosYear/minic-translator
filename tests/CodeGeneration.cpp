@@ -240,5 +240,19 @@ namespace tests
 
 			Assert::AreEqual("; (IN, , , 0)\nIN 0\nSTA VAR0\n", stream.str().c_str());
 		}
+
+		TEST_METHOD(Code__RET) {
+			SymbolTable table;
+			auto func = table.insertFunc("f", SymbolTable::TableRecord::RecordType::integer, 0);
+			auto left = table.insertVar("a", 0, SymbolTable::TableRecord::RecordType::integer);
+			auto right = table.insertVar("b", 0, SymbolTable::TableRecord::RecordType::integer);
+
+			table.calculateOffset();
+			RetAtom atom(std::make_shared<NumberOperand>(5), 0, table);
+			std::ostringstream stream;
+			atom.generate(stream);
+
+			Assert::AreEqual("; (RET, , , '5')\nMVI A, 5\nLXI H, 6\nDAD SP\nMOV M, A\nPOP B\nPOP B\nRET\n", stream.str().c_str());
+		}
 	};
 }

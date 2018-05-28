@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include "..\Operand\Operand.h"
+#include "..\SymbolTable\SymbolTable.h"
 #include "typeinfo"
 
 // Base class for all atoms
@@ -162,13 +163,15 @@ private:
 // Atom for returning value from function
 class RetAtom : public Atom {
 public:
-	RetAtom(const std::shared_ptr<RValue> value);
+	RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable& table);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<RValue> _value;
+	const Scope _scope;
+	const SymbolTable& _table;
 };
 
 // Atom for creating param

@@ -154,13 +154,31 @@ std::string CallAtom::toString() const
 	return "(CALL, " + _function->toString() + ", , " + _result->toString() + ")";
 }
 
-RetAtom::RetAtom(const std::shared_ptr<RValue> value) : _value(value)
+RetAtom::RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable & table) : _value(value), _scope(scope), _table(table)
 {
 }
 
 std::string RetAtom::toString() const
 {
 	return "(RET, , , " + _value->toString() + ")";
+}
+
+void RetAtom::generate(std::ostream & stream) const
+{
+	stream << "; " << toString() << std::endl;
+	unsigned int offset = _table[_scope].offset;
+
+	_value->load(stream);
+
+	stream << "LXI H, " << offset << std::endl;
+	stream << "DAD SP" << std::endl;
+	stream << "MOV M, A" << std::endl;
+
+	for (int i = 0; i < _table.getLocalsCount(_scope); ++i) {
+		stream << "POP B" << std::endl;
+	}
+
+	stream << "RET" << std::endl;
 }
 
 ParamAtom::ParamAtom(const std::shared_ptr<RValue> value) : _value(value)
