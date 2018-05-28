@@ -61,7 +61,7 @@ namespace tests
 
 			stream << table;
 
-			std::string excepted = "0 First\n1 Second\n2 Third";
+			std::string excepted = "STRING TABLE:\n0 First\n1 Second\n2 Third";
 
 			Assert::AreEqual(excepted.c_str(), stream.str().c_str());
 		}

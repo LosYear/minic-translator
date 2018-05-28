@@ -90,6 +90,8 @@ bool Translator::translate()
 			throwSyntaxError("No entry point for given program");
 		}
 
+		_symbolTable.calculateOffset();
+
 		return true;
 	}
 	catch (const LexicalError& error) {

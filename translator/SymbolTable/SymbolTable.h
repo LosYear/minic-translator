@@ -66,6 +66,15 @@ public:
 	// Allocate record for temporary variable
 	std::shared_ptr<MemoryOperand> alloc(Scope scope);
 
+	// Counts locals and temp variables with given scope
+	unsigned int getLocalsCount(const Scope scope) const;
+
+	// Recalculates offset for all symbol table
+	void calculateOffset();
+
+	// Returns names all of functions in string table
+	std::vector<std::string> functionNames() const;
+
 	const TableRecord& operator[](const int index) const;
 	friend std::ostream& operator<<(std::ostream& stream, const SymbolTable& table);
 private:

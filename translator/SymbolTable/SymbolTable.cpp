@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <map>
 #include "SymbolTable.h"
 
 std::shared_ptr<MemoryOperand> SymbolTable::insertVar(const std::string & name, const Scope scope, const TableRecord::RecordType type, const unsigned int init)
@@ -86,6 +87,63 @@ std::shared_ptr<MemoryOperand> SymbolTable::alloc(Scope scope)
 		TableRecord::RecordType::integer,
 		-1, 0, scope));
 	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
+}
+
+unsigned int SymbolTable::getLocalsCount(const Scope scope) const
+{
+	unsigned int vars = 0;
+
+	for (auto it = _records.begin(); it != _records.end(); ++it) {
+		if (it->scope == scope) {
+			vars++;
+		}
+	}
+
+	return vars - _records[scope].len;
+}
+
+void SymbolTable::calculateOffset()
+{
+	std::map<const Scope, unsigned int> counts;
+	unsigned int i = 0;
+	for (auto it = _records.begin(); it != _records.end(); ++it, ++i) {
+		if (it->kind == TableRecord::RecordKind::var && it->scope != SymbolTable::GLOBAL_SCOPE) {
+			unsigned int n = _records[it->scope].len;
+			unsigned int m = getLocalsCount(it->scope);
+			
+			unsigned int j = 1;
+
+			if (counts.find(it->scope) != counts.end()) {
+				j = counts[it->scope] + 1;
+			}
+			counts[it->scope] = j;
+
+			if (j <= n) {
+				it->offset = 2 * (m + n + 1 - j);
+			}
+			else {
+				it->offset = 2 * (m + n - j);
+			}
+		}
+		else if (it->kind == TableRecord::RecordKind::func) {
+			unsigned int n = _records[i].len;
+			unsigned int m = getLocalsCount(i);
+			it->offset = 2 * (m + n + 1);
+		}
+	}
+}
+
+std::vector<std::string> SymbolTable::functionNames() const
+{
+	std::vector<std::string> result;
+
+	for (auto it = _records.begin(); it != _records.end(); ++it) {
+		if (it->kind == TableRecord::RecordKind::func) {
+			result.push_back(it->name);
+		}
+	}
+
+	return result;
 }
 
 const SymbolTable::TableRecord & SymbolTable::operator[](const int index) const
