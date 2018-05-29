@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <deque>
 #include <memory>
 #include "..\Operand\Operand.h"
 #include "..\SymbolTable\SymbolTable.h"
@@ -177,11 +178,12 @@ private:
 // Atom for creating param
 class ParamAtom : public Atom {
 public:
-	ParamAtom(const std::shared_ptr<RValue> value);
+	ParamAtom(const std::shared_ptr<RValue> value, std::deque<std::shared_ptr<RValue>>& paramList);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<RValue> _value;
+	std::deque<std::shared_ptr<RValue>>& _paramList;
 };

@@ -174,20 +174,26 @@ void RetAtom::generate(std::ostream & stream) const
 	stream << "DAD SP" << std::endl;
 	stream << "MOV M, A" << std::endl;
 
-	for (int i = 0; i < _table.getLocalsCount(_scope); ++i) {
+	for (unsigned int i = 0; i < _table.getLocalsCount(_scope); ++i) {
 		stream << "POP B" << std::endl;
 	}
 
 	stream << "RET" << std::endl;
 }
 
-ParamAtom::ParamAtom(const std::shared_ptr<RValue> value) : _value(value)
+ParamAtom::ParamAtom(const std::shared_ptr<RValue> value, std::deque<std::shared_ptr<RValue>>& paramList) : _value(value), _paramList(paramList)
 {
 }
 
 std::string ParamAtom::toString() const
 {
 	return "(PARAM, , , " + _value->toString() + ")";
+}
+
+void ParamAtom::generate(std::ostream & stream) const
+{
+	stream; // remove warning
+	_paramList.push_back(_value);
 }
 
 void SimpleBinaryOpAtom::_generateOperation(std::ostream & stream) const

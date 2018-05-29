@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <deque>
 #include <iostream>
 #include "..\Atom\Atom.h"
 #include "..\StringTable\StringTable.h"
@@ -52,6 +53,7 @@ private:
 	LexicalScanner _lexicalAnalyzer;
 	std::unique_ptr<LexicalToken> _currentLexem;
 	unsigned int _currentLabelId;
+	std::deque<std::shared_ptr<RValue>> _paramsList;
 
 	// History of last 3 lexems
 	LexemHistory _lexemHistory;

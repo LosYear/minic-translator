@@ -143,7 +143,7 @@ unsigned int Translator::ArgList(const Scope context)
 
 	unsigned int m = ArgList_(context);
 
-	generateAtom(std::make_unique<ParamAtom>(p), context);
+	generateAtom(std::make_unique<ParamAtom>(p, _paramsList), context);
 
 	return m + 1;
 }
@@ -161,7 +161,7 @@ unsigned int Translator::ArgList_(const Scope context)
 
 		unsigned int m = ArgList_(context);
 
-		generateAtom(std::make_unique<ParamAtom>(p), context);
+		generateAtom(std::make_unique<ParamAtom>(p, _paramsList), context);
 
 		return m + 1;
 	}
