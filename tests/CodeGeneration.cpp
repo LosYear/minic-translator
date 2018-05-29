@@ -254,5 +254,26 @@ namespace tests
 
 			Assert::AreEqual("; (RET, , , '5')\nMVI A, 5\nLXI H, 6\nDAD SP\nMOV M, A\nPOP B\nPOP B\nRET\n", stream.str().c_str());
 		}
+
+		TEST_METHOD(Code__CALL) {
+			SymbolTable table;
+			std::shared_ptr<MemoryOperand> func = table.insertFunc("func", SymbolTable::TableRecord::RecordType::integer, 1);
+			std::shared_ptr<MemoryOperand> n = table.insertVar("n", 0, SymbolTable::TableRecord::RecordType::integer);
+			std::shared_ptr<MemoryOperand> tmp1 = table.insertVar("[tmp1]", 0, SymbolTable::TableRecord::RecordType::integer);
+			std::shared_ptr<MemoryOperand> tmp2 = table.insertVar("[tmp2]", 0, SymbolTable::TableRecord::RecordType::integer);
+			std::shared_ptr<MemoryOperand> res = table.insertVar("res", -1, SymbolTable::TableRecord::RecordType::integer);
+			table.calculateOffset();
+
+			std::ostringstream stream;
+
+			std::deque<std::shared_ptr<RValue>> paramsList;
+			ParamAtom param(std::make_shared<NumberOperand>(5), paramsList);
+			param.generate(stream);
+
+			CallAtom callAtom(func, res, table, paramsList);
+			callAtom.generate(stream);
+
+			Assert::AreEqual("; (CALL, 0, , 4)\nLXI B, 0\nPUSH B\nMVI A, 5\nMOV C, A\nPUSH B\nCALL func\nPOP B\nPOP B\nMOV A, C\nSTA VAR4\n", stream.str().c_str());
+		}
 	};
 }

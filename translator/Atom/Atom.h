@@ -151,14 +151,16 @@ private:
 // Atom for calling function
 class CallAtom : public Atom {
 public:
-	CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result);
+	CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result, const SymbolTable & table, std::deque<std::shared_ptr<RValue>>& paramList);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const {};
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<MemoryOperand> _function;
 	const std::shared_ptr<MemoryOperand> _result;
+	std::deque<std::shared_ptr<RValue>>& _paramList;
+	const SymbolTable& _table;
 };
 
 // Atom for returning value from function

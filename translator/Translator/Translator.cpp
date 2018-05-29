@@ -261,7 +261,7 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::s
 
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<CallAtom>(s, r), context);
+		generateAtom(std::make_unique<CallAtom>(s, r, _symbolTable, _paramsList), context);
 		return r;
 	}
 	else if (_currentLexem->type() == LexemType::opinc) {
@@ -816,7 +816,7 @@ void Translator::AssignOrCall_(const Scope context, const std::string & p)
 
 		std::shared_ptr<MemoryOperand> r = _symbolTable.alloc(context);
 
-		generateAtom(std::make_unique<CallAtom>(q, r), context);
+		generateAtom(std::make_unique<CallAtom>(q, r, _symbolTable, _paramsList), context);
 
 	}
 	else {

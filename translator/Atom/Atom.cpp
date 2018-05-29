@@ -92,7 +92,7 @@ void OutAtom::generate(std::ostream & stream) const
 		stream << "OUT 1" << std::endl;
 
 	}
-	else if(typeid(*_value) == typeid(StringOperand)) {
+	else if (typeid(*_value) == typeid(StringOperand)) {
 		StringOperand* str = dynamic_cast<StringOperand*>(_value.get());
 		stream << "LXI A, str" << str->index() << std::endl;
 		stream << "CALL @PRINT" << std::endl;
@@ -144,8 +144,8 @@ void JumpAtom::generate(std::ostream & stream) const
 	stream << "JMP LBL" << _label->id() << std::endl;
 }
 
-CallAtom::CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result) 
-	: _function(function), _result(result)
+CallAtom::CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result, const SymbolTable & table, std::deque<std::shared_ptr<RValue>>& paramList)
+	: _function(function), _result(result), _paramList(paramList), _table(table)
 {
 }
 
@@ -154,7 +154,42 @@ std::string CallAtom::toString() const
 	return "(CALL, " + _function->toString() + ", , " + _result->toString() + ")";
 }
 
-RetAtom::RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable & table) : _value(value), _scope(scope), _table(table)
+void CallAtom::generate(std::ostream & stream) const
+{
+
+	stream << "; " + toString() << std::endl;
+
+
+	// Result
+	stream << "LXI B, 0" << std::endl;
+	stream << "PUSH B" << std::endl;
+
+	// PARAMS
+	for (auto it = _paramList.begin(); it != _paramList.end(); ++it) {
+		(*it)->load(stream);
+		stream << "MOV C, A" << std::endl;
+		stream << "PUSH B" << std::endl;
+	}
+
+	stream << "CALL " << _table[_function->index()].name << std::endl;
+
+	// Pop params
+	for (auto it = _paramList.begin(); it != _paramList.end(); ++it) {
+		stream << "POP B" << std::endl;
+	}
+
+	// Pop result
+	stream << "POP B" << std::endl;
+	stream << "MOV A, C" << std::endl; // @TODO: who is wrong? C or B?
+
+	// Save result
+	_result->save(stream);
+
+	_paramList.clear();
+}
+
+RetAtom::RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable & table)
+	: _value(value), _scope(scope), _table(table)
 {
 }
 
