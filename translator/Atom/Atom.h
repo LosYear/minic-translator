@@ -1,12 +1,16 @@
 #pragma once
 #include <string>
+#include <deque>
 #include <memory>
 #include "..\Operand\Operand.h"
+#include "..\SymbolTable\SymbolTable.h"
+#include "typeinfo"
 
 // Base class for all atoms
 class Atom {
 public:
 	virtual std::string toString() const = 0;
+	virtual void generate(std::ostream& stream) const = 0;
 };
 
 
@@ -17,14 +21,29 @@ public:
 		const std::shared_ptr<RValue> right, const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
 
-private:
-	// Operation name, e.g. ADD
-	const std::string _name;
+	void generate(std::ostream& stream) const;
 
+private:
 	const std::shared_ptr<RValue> _left;
 	const std::shared_ptr<RValue> _right;
 
 	const std::shared_ptr<MemoryOperand> _result;
+protected:
+	virtual void _generateOperation(std::ostream& stream) const = 0;
+	// Operation name, e.g. ADD
+	const std::string _name;
+};
+
+class SimpleBinaryOpAtom : public BinaryOpAtom {
+	using BinaryOpAtom::BinaryOpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
+};
+
+class FnBinaryOpAtom : public BinaryOpAtom {
+	using BinaryOpAtom::BinaryOpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
 };
 
 
@@ -34,6 +53,8 @@ public:
 	UnaryOpAtom(const std::string& name, const std::shared_ptr<RValue> operand,
 		const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const;
 
 private:
 	// Operation name, e.g. NEG
@@ -51,14 +72,30 @@ public:
 		const std::shared_ptr<RValue> right, const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
-private:
-	// e.g. EQ
-	const std::string _condition;
+	void generate(std::ostream& stream) const;
 
+private:
 	const std::shared_ptr<RValue> _left;
 	const std::shared_ptr<RValue> _right;
 
+protected:
+	// e.g. EQ
+	const std::string _condition;
 	const std::shared_ptr<LabelOperand> _label;
+
+	virtual void _generateOperation(std::ostream& stream) const = 0;
+};
+
+class SimpleConditionalJumpAtom : public ConditionalJumpAtom {
+	using ConditionalJumpAtom::ConditionalJumpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
+};
+
+class ComplexConditinalJumpAtom : public ConditionalJumpAtom {
+	using ConditionalJumpAtom::ConditionalJumpAtom;
+protected:
+	void _generateOperation(std::ostream& stream) const;
 };
 
 
@@ -66,6 +103,8 @@ class OutAtom : public Atom {
 public:
 	OutAtom(const std::shared_ptr<Operand> value);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<Operand> _value;
@@ -76,6 +115,8 @@ class InAtom : public Atom {
 public:
 	InAtom(const std::shared_ptr<MemoryOperand> result);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<MemoryOperand> _result;
@@ -88,6 +129,8 @@ public:
 	LabelAtom(const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
+	void generate(std::ostream& stream) const;
+
 private:
 	const std::shared_ptr<LabelOperand> _label;
 };
@@ -99,6 +142,8 @@ public:
 	JumpAtom(const std::shared_ptr<LabelOperand> label);
 	std::string toString() const;
 
+	void generate(std::ostream& stream) const;
+
 private:
 	const std::shared_ptr<LabelOperand> _label;
 };
@@ -106,30 +151,64 @@ private:
 // Atom for calling function
 class CallAtom : public Atom {
 public:
-	CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result);
+	CallAtom(const std::shared_ptr<MemoryOperand> function, const std::shared_ptr<MemoryOperand> result, const SymbolTable & table, std::deque<std::shared_ptr<RValue>>& paramList);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<MemoryOperand> _function;
 	const std::shared_ptr<MemoryOperand> _result;
+	std::deque<std::shared_ptr<RValue>>& _paramList;
+	const SymbolTable& _table;
+
+
+	// Generates code for pushing regs to stack
+	void _saveRegs(std::ostream& stream) const;
+
+	// Generates code for poping all regs from stack
+	void _loadRegs(std::ostream& stream) const;
 };
 
 // Atom for returning value from function
 class RetAtom : public Atom {
 public:
-	RetAtom(const std::shared_ptr<RValue> value);
+	RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable& table);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const
+	{
+		stream << "; " << toString() << std::endl;
+		unsigned int offset = _table[_scope].offset;
+
+		_value->load(stream);
+
+		stream << "LXI H, " << offset << std::endl;
+		stream << "DAD SP" << std::endl;
+		stream << "MOV M, A" << std::endl;
+
+		for (unsigned int i = 0; i < _table.getLocalsCount(_scope); ++i) {
+			stream << "POP B" << std::endl;
+		}
+
+		stream << "RET" << std::endl;
+	}
 
 private:
 	const std::shared_ptr<RValue> _value;
+	const Scope _scope;
+	const SymbolTable& _table;
 };
 
 // Atom for creating param
 class ParamAtom : public Atom {
 public:
-	ParamAtom(const std::shared_ptr<RValue> value);
+	ParamAtom(const std::shared_ptr<RValue> value, std::deque<std::shared_ptr<RValue>>& paramList);
 	std::string toString() const;
+
+	void generate(std::ostream& stream) const;
 
 private:
 	const std::shared_ptr<RValue> _value;
+	std::deque<std::shared_ptr<RValue>>& _paramList;
 };

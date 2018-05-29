@@ -33,6 +33,35 @@ bool MemoryOperand::operator==(MemoryOperand & other)
 	return _index == other._index && _symbolTable == other._symbolTable;
 }
 
+void MemoryOperand::save(std::ostream & stream) const
+{
+	if ((*_symbolTable)[_index].scope == SymbolTable::GLOBAL_SCOPE) {
+		stream << "STA VAR" << _index << std::endl;
+	}
+	else {
+		unsigned int offset = (*_symbolTable)[_index].offset;
+
+		stream << "LXI H, " << offset << std::endl;
+		stream << "DAD SP" << std::endl;
+		stream << "MOV M, A" << std::endl;
+	}
+}
+
+void MemoryOperand::load(std::ostream & stream) const
+{
+	if ((*_symbolTable)[_index].scope == SymbolTable::GLOBAL_SCOPE) {
+		stream << "LDA VAR" << _index << std::endl;
+	}
+	else {
+		unsigned int offset = (*_symbolTable)[_index].offset;
+
+		stream << "LXI H, " << offset << std::endl;
+		stream << "DAD SP" << std::endl;
+
+		stream << "MOV A, M" << std::endl;
+	}
+}
+
 bool StringOperand::operator==(StringOperand & other)
 {
 	return _index == other._index && _stringTable == other._stringTable;
@@ -48,6 +77,11 @@ std::string NumberOperand::toString(bool expanded) const
 	return str;
 }
 
+void NumberOperand::load(std::ostream & stream) const
+{
+	stream << "MVI A, " << std::to_string(_value) << std::endl;
+}
+
 std::string StringOperand::toString(bool expanded) const
 {
 	if (!expanded) {
@@ -58,6 +92,11 @@ std::string StringOperand::toString(bool expanded) const
 	return str;
 }
 
+const int StringOperand::index() const
+{
+	return _index;
+}
+
 std::string LabelOperand::toString(bool expanded) const
 {
 	if (!expanded) {
@@ -66,4 +105,9 @@ std::string LabelOperand::toString(bool expanded) const
 
 	std::string str = "[LblOp, " + std::to_string(_id) + "]";
 	return str;
+}
+
+int LabelOperand::id() const
+{
+	return _id;
 }

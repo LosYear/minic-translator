@@ -13,7 +13,11 @@ public:
 
 
 // Base class for all math operands
-class RValue : public Operand {};
+class RValue : public Operand {
+public: 
+	// Generates i8080 code to load given operand to A reg
+	virtual void load(std::ostream& stream) const = 0;
+};
 
 
 // Operands stored in memory
@@ -25,6 +29,11 @@ public:
 	const int index() const;
 
 	bool operator==(MemoryOperand& other);
+
+	// Generates i8080 code to save A reg to given place
+	void save(std::ostream& stream) const;
+
+	void load(std::ostream& stream) const;
 private:
 	const int _index;
 	const SymbolTable* _symbolTable;
@@ -36,6 +45,8 @@ class NumberOperand : public RValue {
 public:
 	NumberOperand(const int value);
 	std::string toString(bool expanded = false) const;
+
+	void load(std::ostream& stream) const;
 private:
 	const int _value;
 };
@@ -46,6 +57,7 @@ class StringOperand : public Operand {
 public:
 	StringOperand(const int index, const StringTable* stringTable);
 	std::string toString(bool expanded = false) const;
+	const int index() const;
 
 	bool operator==(StringOperand& other);
 private:
@@ -59,6 +71,7 @@ class LabelOperand : public Operand {
 public:
 	LabelOperand(const int labelID);
 	std::string toString(bool expanded = false) const;
+	int id() const;
 private:
 	int _id;
 };

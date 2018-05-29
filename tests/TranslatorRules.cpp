@@ -666,8 +666,8 @@ namespace tests
 			std::string excepted = std::string("SYMBOL TABLE:\n") +
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
-				"0          n          func       integer    0          0          -1         0          \n" +
-				"1          main       func       integer    0          0          -1         0          \n";
+				"0          n          func       integer    0          0          -1         2          \n" +
+				"1          main       func       integer    0          0          -1         2          \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
@@ -685,10 +685,10 @@ namespace tests
 			std::string excepted = std::string("SYMBOL TABLE:\n") +
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
-				"0          n          func       integer    2          0          -1         0          \n" +
-				"1          b          var        integer    -1         0          0          0          \n" +
-				"2          c          var        chr        -1         0          0          0          \n" +
-				"3          main       func       integer    0          0          -1         0          \n";
+				"0          n          func       integer    2          0          -1         6          \n" +
+				"1          b          var        integer    -1         0          0          4          \n" +
+				"2          c          var        chr        -1         0          0          2          \n" +
+				"3          main       func       integer    0          0          -1         2          \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
@@ -707,7 +707,7 @@ namespace tests
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
 				"0          n          var        integer    -1         5          -1         0          \n" +
-				"1          main       func       integer    0          0          -1         0          \n";
+				"1          main       func       integer    0          0          -1         2          \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
@@ -729,7 +729,7 @@ namespace tests
 				"1          b          var        chr        -1         5          -1         0          \n" +
 				"2          c          var        chr        -1         0          -1         0          \n" +
 				"3          k          var        integer    -1         10         -1         0          \n" +
-				"4          main       func       integer    0          0          -1         0          \n";
+				"4          main       func       integer    0          0          -1         2          \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
@@ -747,10 +747,10 @@ namespace tests
 			std::string excepted = std::string("SYMBOL TABLE:\n") +
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
-				"0          main       func       integer    0          0          -1         0          \n" +
-				"1          a          var        chr        -1         0          0          0          \n" +
-				"2          b          var        chr        -1         5          0          0          \n" +
-				"3          c          var        chr        -1         0          0          0          \n" +
+				"0          main       func       integer    0          0          -1         10         \n" +
+				"1          a          var        chr        -1         0          0          6          \n" +
+				"2          b          var        chr        -1         5          0          4          \n" +
+				"3          c          var        chr        -1         0          0          2          \n" +
 				"4          k          var        integer    -1         10         0          0          \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());

@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Atoms.cpp" />
+    <ClCompile Include="CodeGeneration.cpp" />
     <ClCompile Include="LexemHistory.cpp" />
     <ClCompile Include="LexicalAnalyzer.cpp" />
     <ClCompile Include="Operands.cpp" />
