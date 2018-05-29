@@ -33,6 +33,10 @@ int main() {
 		std::ofstream atoms(filename + ".atoms.txt");
 		translator.printAtoms(atoms);
 
+		// Print code
+		std::ofstream asmCode(filename + ".asm.txt");
+		translator.generateCode(asmCode);
+
 		status.close();
 		input.close();
 		atoms.close();

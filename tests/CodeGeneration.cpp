@@ -273,7 +273,10 @@ namespace tests
 			CallAtom callAtom(func, res, table, paramsList);
 			callAtom.generate(stream);
 
-			Assert::AreEqual("; (CALL, 0, , 4)\nLXI B, 0\nPUSH B\nMVI A, 5\nMOV C, A\nPUSH B\nCALL func\nPOP B\nPOP B\nMOV A, C\nSTA VAR4\n", stream.str().c_str());
+			Assert::AreEqual((std::string("; (CALL, 0, , 4)\n") +
+				"PUSH PSW\nPUSH B\nPUSH D\nPUSH H\n" +
+				"LXI B, 0\nPUSH B\nMVI A, 5\nMOV C, A\nPUSH B\nCALL func\nPOP B\nPOP B\nMOV A, C\nSTA VAR4\n" +
+				"POP H\nPOP D\nPOP B\nPOP PSW\n").c_str(), stream.str().c_str());
 		}
 	};
 }

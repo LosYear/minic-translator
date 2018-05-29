@@ -136,7 +136,7 @@ void SymbolTable::calculateOffset()
 void SymbolTable::generateGlobalsSection(std::ostream & stream) const
 {
 	for (unsigned int i = 0; i < _records.size(); ++i) {
-		if (_records[i].scope == SymbolTable::GLOBAL_SCOPE) {
+		if (_records[i].scope == SymbolTable::GLOBAL_SCOPE && _records[i].kind == SymbolTable::TableRecord::RecordKind::var) {
 			stream << "var" << i << ": DB " << _records[i].init << std::endl;
 		}
 	}
@@ -149,6 +149,19 @@ std::vector<std::string> SymbolTable::functionNames() const
 	for (auto it = _records.begin(); it != _records.end(); ++it) {
 		if (it->kind == TableRecord::RecordKind::func) {
 			result.push_back(it->name);
+		}
+	}
+
+	return result;
+}
+
+std::vector<unsigned int> SymbolTable::functionsIds() const
+{
+	std::vector<unsigned int> result;
+
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].kind == TableRecord::RecordKind::func) {
+			result.push_back(i);
 		}
 	}
 
