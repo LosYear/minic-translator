@@ -43,6 +43,9 @@ public:
 	// Runs translation
 	bool translate();
 
+	// Generates code
+	void generateCode(std::ostream& stream) const;
+
 	// Translates single expression
 	std::shared_ptr<RValue> translateExpresssion();
 	bool translateExpression(int);
@@ -132,9 +135,6 @@ private:
 	void OOp(const Scope context);
 	void OOp_(const Scope context);
 
-	// Generates code for pushing regs to stack
-	void _saveRegs(std::ostream& stream) const;
-
-	// Generates code for poping all regs from stack
-	void _loadRegs(std::ostream& stream) const;
+	void _generateProlog(std::ostream& stream) const;
+	void _generateFunctionCode(std::ostream& stream, unsigned int function) const;
 };

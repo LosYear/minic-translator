@@ -159,6 +159,8 @@ void CallAtom::generate(std::ostream & stream) const
 
 	stream << "; " + toString() << std::endl;
 
+	// Push regs
+	_saveRegs(stream);
 
 	// Result
 	stream << "LXI B, 0" << std::endl;
@@ -185,7 +187,27 @@ void CallAtom::generate(std::ostream & stream) const
 	// Save result
 	_result->save(stream);
 
+	// Pop regs
+	_loadRegs(stream);
+
 	_paramList.clear();
+}
+
+
+void CallAtom::_saveRegs(std::ostream & stream) const
+{
+	stream << "PUSH PSW" << std::endl;
+	stream << "PUSH B" << std::endl;
+	stream << "PUSH D" << std::endl;
+	stream << "PUSH H" << std::endl;
+}
+
+void CallAtom::_loadRegs(std::ostream & stream) const
+{
+	stream << "POP H" << std::endl;
+	stream << "POP D" << std::endl;
+	stream << "POP B" << std::endl;
+	stream << "POP PSW" << std::endl;
 }
 
 RetAtom::RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable & table)
@@ -196,24 +218,6 @@ RetAtom::RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const S
 std::string RetAtom::toString() const
 {
 	return "(RET, , , " + _value->toString() + ")";
-}
-
-void RetAtom::generate(std::ostream & stream) const
-{
-	stream << "; " << toString() << std::endl;
-	unsigned int offset = _table[_scope].offset;
-
-	_value->load(stream);
-
-	stream << "LXI H, " << offset << std::endl;
-	stream << "DAD SP" << std::endl;
-	stream << "MOV M, A" << std::endl;
-
-	for (unsigned int i = 0; i < _table.getLocalsCount(_scope); ++i) {
-		stream << "POP B" << std::endl;
-	}
-
-	stream << "RET" << std::endl;
 }
 
 ParamAtom::ParamAtom(const std::shared_ptr<RValue> value, std::deque<std::shared_ptr<RValue>>& paramList) : _value(value), _paramList(paramList)

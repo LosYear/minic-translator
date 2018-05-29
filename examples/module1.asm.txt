@@ -1,0 +1,132 @@
+ORG 8000H
+str0: DB '\nResult = ', 0
+ORG 0
+LXI H, 0
+SPHL
+CALL main
+END
+@MULT:
+; code for mult lib
+@PRINT:
+; code for mult lib
+even: LXI B, 0
+PUSH B
+PUSH B
+; (ADD, 1, '2', 2)
+MVI A, 2
+MOV B, A
+LXI H, 6
+DAD SP
+MOV A, M
+ADD B
+LXI H, 2
+DAD SP
+MOV M, A
+; (MOV, '1', , 3)
+MVI A, 1
+LXI H, 0
+DAD SP
+MOV M, A
+; (EQ, 2, '0', lbl`0`)
+MVI A, 0
+MOV B, A
+LXI H, 2
+DAD SP
+MOV A, M
+CMP B
+JZ LBL0
+; (MOV, '0', , 3)
+MVI A, 0
+LXI H, 0
+DAD SP
+MOV M, A
+LBL0: ; (EQ, 3, '0', lbl`1`)
+MVI A, 0
+MOV B, A
+LXI H, 0
+DAD SP
+MOV A, M
+CMP B
+JZ LBL1
+; (RET, , , '1')
+MVI A, 1
+LXI H, 8
+DAD SP
+MOV M, A
+POP B
+POP B
+RET
+; (JMP, , , lbl`2`)
+JMP LBL2
+LBL1: ; (RET, , , '0')
+MVI A, 0
+LXI H, 8
+DAD SP
+MOV M, A
+POP B
+POP B
+RET
+LBL2: ; (RET, , , '0')
+MVI A, 0
+LXI H, 8
+DAD SP
+MOV M, A
+POP B
+POP B
+RET
+main: LXI B, 0
+PUSH B
+PUSH B
+PUSH B
+; (IN, , , 5)
+IN 0
+LXI H, 4
+DAD SP
+MOV M, A
+; (CALL, 0, , 7)
+PUSH PSW
+PUSH B
+PUSH D
+PUSH H
+LXI B, 0
+PUSH B
+LXI H, 4
+DAD SP
+MOV A, M
+MOV C, A
+PUSH B
+CALL even
+POP B
+POP B
+MOV A, C
+LXI H, 0
+DAD SP
+MOV M, A
+POP H
+POP D
+POP B
+POP PSW
+; (MOV, 7, , 6)
+LXI H, 0
+DAD SP
+MOV A, M
+LXI H, 2
+DAD SP
+MOV M, A
+; (OUT, , , str`0`)
+LXI A, str0
+CALL @PRINT
+; (OUT, , , 6)
+LXI H, 2
+DAD SP
+MOV A, M
+OUT 1
+; (RET, , , '0')
+MVI A, 0
+LXI H, 8
+DAD SP
+MOV M, A
+POP B
+POP B
+POP B
+RET

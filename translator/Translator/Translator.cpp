@@ -104,6 +104,20 @@ bool Translator::translate()
 	}
 }
 
+void Translator::generateCode(std::ostream & stream) const
+{
+	stream << "ORG 8000H" << std::endl;
+	_symbolTable.generateGlobalsSection(stream);
+	_stringTable.generateGlobalsSection(stream);
+	_generateProlog(stream);
+
+	std::vector<unsigned int> fns = _symbolTable.functionsIds();
+
+	for (auto it = fns.begin(); it != fns.end(); ++it) {
+		_generateFunctionCode(stream, *it);
+	}
+}
+
 LexicalToken Translator::_getNextLexem()
 {
 	_currentLexem = std::make_unique<LexicalToken>(_lexicalAnalyzer.getNextToken());
@@ -597,7 +611,7 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 
 		_takeTerm(LexemType::rbrace);
 
-		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0), context, _symbolTable), newContext);
+		generateAtom(std::make_unique<RetAtom>(std::make_shared<NumberOperand>(0), newContext, _symbolTable), newContext);
 	}
 	else if (_currentLexem->type() == LexemType::opassign) {
 		_getNextLexem();
@@ -1086,18 +1100,32 @@ void Translator::OOp_(const Scope context)
 	}
 }
 
-void Translator::_saveRegs(std::ostream & stream) const
+void Translator::_generateProlog(std::ostream & stream) const
 {
-	stream << "PUSH PSW" << std::endl;
-	stream << "PUSH B" << std::endl;
-	stream << "PUSH D" << std::endl;
-	stream << "PUSH H" << std::endl;
+	stream << "ORG 0" << std::endl;
+	stream << "LXI H, 0" << std::endl;
+	stream << "SPHL" << std::endl;
+	stream << "CALL main" << std::endl;
+	stream << "END" << std::endl;
+
+	stream << "@MULT:" << std::endl << "; code for mult lib" << std::endl;
+	stream << "@PRINT:" << std::endl << "; code for mult lib" << std::endl;
 }
 
-void Translator::_loadRegs(std::ostream & stream) const
+void Translator::_generateFunctionCode(std::ostream & stream, unsigned int function) const
 {
-	stream << "POP H" << std::endl;
-	stream << "POP D" << std::endl;
-	stream << "POP B" << std::endl;
-	stream << "POP PSW" << std::endl;
+	const SymbolTable::TableRecord* record = &_symbolTable[function];
+
+	stream << record->name << ": ";
+
+	stream << "LXI B, 0" << std::endl;
+	for (unsigned int i = 0; i < _symbolTable.getLocalsCount(function); ++i) {
+		stream << "PUSH B" << std::endl;
+	}
+
+	for (auto it = _atoms.at(function).begin(); it != _atoms.at(function).end(); ++it) {
+		
+		(*it)->generate(stream);
+	}
+
 }
