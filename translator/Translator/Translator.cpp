@@ -847,6 +847,33 @@ void Translator::AssignOrCall_(const Scope context, const std::string & p)
 		std::shared_ptr<MemoryOperand> r = _symbolTable.checkVar(context, p);
 		generateAtom(std::make_unique<UnaryOpAtom>("MOV", q, r), context);
 	}
+	else if (_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> index = E(context);
+
+		if (!index) {
+			throwSyntaxError("Can't parse array key.");
+		}
+
+		_takeTerm(LexemType::rbracket);
+
+		// Check is array
+		std::shared_ptr<MemoryOperand> arr = _symbolTable.checkArray(context, p);
+		if (!arr) {
+			throwSyntaxError(p + " is not array.");
+		}
+
+		_takeTerm(LexemType::opassign);
+
+		std::shared_ptr<RValue> value = E(context);
+		if (!value) {
+			throwSyntaxError("Can't parse value of assignment");
+		}
+
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", value, std::make_shared<ArrayElementOperand>(arr->index(), index, &_symbolTable)), context);
+
+	}
 	else if (_currentLexem->type() == LexemType::lpar) {
 		_getNextLexem();
 

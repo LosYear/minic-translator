@@ -98,5 +98,16 @@ namespace tests
 
 			Assert::AreEqual("STA VAR0\n", stream.str().c_str());
 		}
+
+		TEST_METHOD(ArrayElementOperand__Init)
+		{
+			SymbolTable symbolTable;
+			symbolTable.insertArray("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+			symbolTable.insertArray("b", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 15);
+			auto key = symbolTable.insertVar("c", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+
+			ArrayElementOperand arrOp(0, key, &symbolTable);
+			Assert::AreEqual("[ArrayElOp, 0[2], a]", arrOp.toString(true).c_str());
+		}
 	};
 }

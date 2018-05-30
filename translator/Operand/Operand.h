@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 
 class SymbolTable;
 class StringTable;
@@ -34,9 +35,27 @@ public:
 	void save(std::ostream& stream) const;
 
 	void load(std::ostream& stream) const;
-private:
+protected:
 	const int _index;
 	const SymbolTable* _symbolTable;
+};
+
+// Array element
+class ArrayElementOperand : public MemoryOperand {
+public:
+	ArrayElementOperand(const int index, std::shared_ptr<RValue> elementIndex, const SymbolTable* symbolTable);
+	std::string toString(bool expanded = false) const;
+
+	bool operator==(ArrayElementOperand& other);
+
+	const std::shared_ptr<RValue> elementIndex() const;
+
+	// Generates i8080 code to save A reg to given place
+	void save(std::ostream& stream) const { stream; };
+
+	void load(std::ostream& stream) const { stream; };
+protected:
+	const std::shared_ptr<RValue>_elementIndex;
 };
 
 

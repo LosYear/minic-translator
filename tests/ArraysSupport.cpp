@@ -60,7 +60,43 @@ namespace Tests
 		}
 
 		TEST_METHOD(Array__DeclarationAsArgument) {
-			std::istringstream stream("int main(int a, int b[10]){int a, b[10], c = 3; int k[15];}");
+			std::istringstream stream("int main(int a, int b[10]){int k[15];}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsFalse(translated);
+		}
+
+		TEST_METHOD(Array__ElementAssignmentByIndex) {
+			std::istringstream stream("int main(){int array[10]; array[0] = 10 + 3;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = "0 (ADD, '10', '3', 2)\n0 (MOV, 2, , 1['0'])\n0 (RET, , , '0')";
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Array__ElementAssignmentByExpr) {
+			std::istringstream stream("int main(){int array[10]; int k; array[k + 1] = 10 + 3;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printAtoms(result, 0);
+
+			std::string excepted = "0 (ADD, 2, '1', 3)\n0 (ADD, '10', '3', 4)\n0 (MOV, 4, , 1[3])\n0 (RET, , , '0')";
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
+		}
+
+		TEST_METHOD(Array__ElementAssignmentOfVar) {
+			std::istringstream stream("int main(){int array; array[0] = 10 + 3;}");
 			Translator translator(stream);
 
 			bool translated = translator.translate();

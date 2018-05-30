@@ -111,3 +111,29 @@ int LabelOperand::id() const
 {
 	return _id;
 }
+
+ArrayElementOperand::ArrayElementOperand(const int index, std::shared_ptr<RValue> elementIndex, const SymbolTable* symbolTable):
+	MemoryOperand(index, symbolTable), _elementIndex(elementIndex)
+{
+}
+
+std::string ArrayElementOperand::toString(bool expanded) const
+{
+	if (!expanded) {
+		return std::to_string(_index) + "[" + _elementIndex->toString() + "]"; 
+	}
+
+	std::string str = "[ArrayElOp, " + std::to_string(_index) + "[" + _elementIndex->toString() + "]"
+		+ ", " + (*_symbolTable)[_index].name + "]";
+	return str;
+}
+
+bool ArrayElementOperand::operator==(ArrayElementOperand & other)
+{
+	return _index == other._index && _symbolTable == other._symbolTable && _elementIndex == other._elementIndex;
+}
+
+const std::shared_ptr<RValue> ArrayElementOperand::elementIndex() const
+{
+	return _elementIndex;
+}
