@@ -77,7 +77,7 @@ namespace tests
 
 			translator.translateExpression(0);
 
-			Assert::AreEqual("Syntax error: Excepted rpar, got [eof]\nAfter lexems: [id, \"str\"] [opand] [id, \"str2\"]", errors.str().c_str());
+			Assert::AreEqual("Syntax error: Expected rpar, got [eof]\nAfter lexems: [id, \"str\"] [opand] [id, \"str2\"]", errors.str().c_str());
 		}
 
 		TEST_METHOD(Translator__SyntaxException_noMain)

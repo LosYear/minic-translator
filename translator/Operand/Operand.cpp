@@ -111,3 +111,95 @@ int LabelOperand::id() const
 {
 	return _id;
 }
+
+ArrayElementOperand::ArrayElementOperand(const int index, std::shared_ptr<RValue> elementIndex, const SymbolTable* symbolTable) :
+	MemoryOperand(index, symbolTable), _elementIndex(elementIndex)
+{
+}
+
+std::string ArrayElementOperand::toString(bool expanded) const
+{
+	if (!expanded) {
+		return std::to_string(_index) + "[" + _elementIndex->toString() + "]";
+	}
+
+	std::string str = "[ArrayElOp, " + std::to_string(_index) + "[" + _elementIndex->toString() + "]"
+		+ ", " + (*_symbolTable)[_index].name + "]";
+	return str;
+}
+
+bool ArrayElementOperand::operator==(ArrayElementOperand & other)
+{
+	return _index == other._index && _symbolTable == other._symbolTable && _elementIndex == other._elementIndex;
+}
+
+const std::shared_ptr<RValue> ArrayElementOperand::elementIndex() const
+{
+	return _elementIndex;
+}
+
+void ArrayElementOperand::save(std::ostream & stream) const
+{
+	stream << "MOV C, A" << std::endl;
+	if ((*_symbolTable)[_index].scope == SymbolTable::GLOBAL_SCOPE) {
+		_elementIndex->load(stream);
+
+		stream << "LXI H, ARR" << _index << std::endl;
+		stream << "LXI D, 0" << std::endl;
+		stream << "MOV E, A" << std::endl;
+		stream << "ADD E" << std::endl;
+		stream << "MOV E, A" << std::endl;
+
+		stream << "DAD D" << std::endl;
+	}
+	else {
+		unsigned int offset = (*_symbolTable)[_index].offset;
+
+		_elementIndex->load(stream);
+
+		stream << "LXI H, " << offset << std::endl;
+
+		stream << "LXI D, 0" << std::endl;
+		stream << "MOV E, A" << std::endl;
+		stream << "ADD E" << std::endl;
+		stream << "MOV E, A" << std::endl;
+
+		stream << "DAD SP" << std::endl;
+		stream << "DAD D" << std::endl;
+	}
+
+	stream << "MOV A, C" << std::endl;
+	stream << "MOV M, A" << std::endl;
+
+}
+
+void ArrayElementOperand::load(std::ostream & stream) const
+{
+	if ((*_symbolTable)[_index].scope == SymbolTable::GLOBAL_SCOPE) {
+		_elementIndex->load(stream);
+		stream << "LXI H, ARR" << _index << std::endl;
+		stream << "LXI D, 0" << std::endl;
+		stream << "MOV E, A" << std::endl;
+		stream << "ADD E" << std::endl;
+		stream << "MOV E, A" << std::endl;
+
+		stream << "DAD D" << std::endl;
+	}
+	else {
+		unsigned int offset = (*_symbolTable)[_index].offset;
+
+		_elementIndex->load(stream);
+
+		stream << "LXI H, " << offset << std::endl;
+
+		stream << "LXI D, 0" << std::endl;
+		stream << "MOV E, A" << std::endl;
+		stream << "ADD E" << std::endl;
+		stream << "MOV E, A" << std::endl;
+
+		stream << "DAD SP" << std::endl;
+		stream << "DAD D" << std::endl;
+	}
+
+	stream << "MOV A, M" << std::endl;
+}

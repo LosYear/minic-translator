@@ -18,6 +18,22 @@ std::shared_ptr<MemoryOperand> SymbolTable::insertVar(const std::string & name, 
 	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
 }
 
+std::shared_ptr<MemoryOperand> SymbolTable::insertArray(const std::string & name, const Scope scope, const TableRecord::RecordType type, const unsigned int len)
+{
+	// Check if record exists in table
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].scope == scope) {
+			return nullptr;
+		}
+	}
+
+	// Record not found, insert
+	TableRecord record(name, TableRecord::RecordKind::array, type, len, 0, scope, 0);
+
+	_records.push_back(record);
+	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
+}
+
 std::shared_ptr<MemoryOperand> SymbolTable::insertFunc(const std::string & name, const TableRecord::RecordType type, const int len)
 {
 	// Check if record exists in table
@@ -70,6 +86,29 @@ std::shared_ptr<MemoryOperand> SymbolTable::checkFunc(const std::string & name, 
 	return nullptr;
 }
 
+std::shared_ptr<MemoryOperand> SymbolTable::checkArray(const Scope scope, const std::string & name)
+{
+	// Find var in given scope
+	int globalScopedValue = -1;
+
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].scope == scope &&
+			_records[i].kind == SymbolTable::TableRecord::RecordKind::array) {
+			return std::make_shared<MemoryOperand>(i, this);
+		}
+		else if (_records[i].name == name && _records[i].scope == SymbolTable::GLOBAL_SCOPE
+			&& _records[i].kind == SymbolTable::TableRecord::RecordKind::array) {
+			globalScopedValue = i;
+		}
+	}
+
+	if (globalScopedValue == -1) {
+		return nullptr;
+	}
+
+	return std::make_shared<MemoryOperand>(globalScopedValue, this);
+}
+
 bool SymbolTable::changeArgsCount(const int index, const int len)
 {
 	if (_records[index].kind != SymbolTable::TableRecord::RecordKind::func) {
@@ -94,7 +133,7 @@ unsigned int SymbolTable::getLocalsCount(const Scope scope) const
 	unsigned int vars = 0;
 
 	for (auto it = _records.begin(); it != _records.end(); ++it) {
-		if (it->scope == scope) {
+		if (it->scope == scope && it->kind == TableRecord::RecordKind::var){
 			vars++;
 		}
 	}
@@ -105,11 +144,14 @@ unsigned int SymbolTable::getLocalsCount(const Scope scope) const
 void SymbolTable::calculateOffset()
 {
 	std::map<const Scope, unsigned int> counts;
+	std::map<const Scope, unsigned int> arraysOffsets;
 	unsigned int i = 0;
 	for (auto it = _records.begin(); it != _records.end(); ++it, ++i) {
+
 		if (it->kind == TableRecord::RecordKind::var && it->scope != SymbolTable::GLOBAL_SCOPE) {
 			unsigned int n = _records[it->scope].len;
 			unsigned int m = getLocalsCount(it->scope);
+			unsigned int arrays = getArraysSize(it->scope);
 
 			unsigned int j = 1;
 
@@ -119,16 +161,26 @@ void SymbolTable::calculateOffset()
 			counts[it->scope] = j;
 
 			if (j <= n) {
-				it->offset = 2 * (m + n + 1 - j);
+				it->offset = 2 * (m + n + 1 - j) + 2 * arrays;
 			}
 			else {
+
 				it->offset = 2 * (m + n - j);
 			}
 		}
 		else if (it->kind == TableRecord::RecordKind::func) {
 			unsigned int n = _records[i].len;
 			unsigned int m = getLocalsCount(i);
-			it->offset = 2 * (m + n + 1);
+			unsigned int arrays = getArraysSize(i);
+			it->offset = 2 * (m + n + 1) + 2 * arrays;
+		}
+		else if (it->kind == TableRecord::RecordKind::array && it->scope != SymbolTable::GLOBAL_SCOPE) {
+			if (arraysOffsets.find(it->scope) == arraysOffsets.end()) {
+				arraysOffsets[it->scope] = getLocalsCount(it->scope) * 2;
+			}
+
+			it->offset = arraysOffsets[it->scope];
+			arraysOffsets[it->scope] += 2 * it->len;
 		}
 	}
 }
@@ -138,6 +190,9 @@ void SymbolTable::generateGlobalsSection(std::ostream & stream) const
 	for (unsigned int i = 0; i < _records.size(); ++i) {
 		if (_records[i].scope == SymbolTable::GLOBAL_SCOPE && _records[i].kind == SymbolTable::TableRecord::RecordKind::var) {
 			stream << "var" << i << ": DB " << _records[i].init << std::endl;
+		}
+		else if (_records[i].scope == SymbolTable::GLOBAL_SCOPE && _records[i].kind == SymbolTable::TableRecord::RecordKind::array) {
+			stream << "ARR" << i << ": DS " << _records[i].len * 2 << std::endl;
 		}
 	}
 }
@@ -171,6 +226,19 @@ std::vector<unsigned int> SymbolTable::functionsIds() const
 const SymbolTable::TableRecord & SymbolTable::operator[](const int index) const
 {
 	return _records[index];
+}
+
+unsigned int SymbolTable::getArraysSize(const Scope scope) const
+{
+	unsigned int result = 0;
+
+	for (auto it = _records.begin(); it != _records.end(); ++it) {
+		if (it->scope == scope && it->kind == SymbolTable::TableRecord::RecordKind::array){
+			result += it->len;
+		}
+	}
+
+	return result;
 }
 
 SymbolTable::TableRecord::TableRecord(std::string & _name, RecordKind _kind, RecordType _type, int _len, int _init, Scope _scope, int _offset)
@@ -232,6 +300,7 @@ std::ostream & operator<<(std::ostream & stream, const SymbolTable & table)
 		switch (record.kind) {
 		case SymbolTable::TableRecord::RecordKind::func: stream << "func"; break;
 		case SymbolTable::TableRecord::RecordKind::var: stream << "var"; break;
+		case SymbolTable::TableRecord::RecordKind::array: stream << "array"; break;
 		case SymbolTable::TableRecord::RecordKind::unknown: stream << "unknown"; break;
 		}
 		stream << std::setw(1) << " ";

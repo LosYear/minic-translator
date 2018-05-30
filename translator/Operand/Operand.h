@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 
 class SymbolTable;
 class StringTable;
@@ -12,16 +13,24 @@ public:
 };
 
 
-// Base class for all math operands
-class RValue : public Operand {
-public: 
+class SavebleOperandInterface {
+public:
+	// Generates i8080 code to load given operand to A reg
+	virtual void save(std::ostream& stream) const = 0;
+};
+
+class LoadableOperandInterface {
+public:
 	// Generates i8080 code to load given operand to A reg
 	virtual void load(std::ostream& stream) const = 0;
 };
 
+// Base class for all math operands
+class RValue : public Operand, public LoadableOperandInterface {};
+
 
 // Operands stored in memory
-class MemoryOperand : public RValue {
+class MemoryOperand : public RValue, public SavebleOperandInterface {
 public:
 	MemoryOperand(const int index, const SymbolTable* symbolTable);
 	std::string toString(bool expanded = false) const;
@@ -32,11 +41,28 @@ public:
 
 	// Generates i8080 code to save A reg to given place
 	void save(std::ostream& stream) const;
-
 	void load(std::ostream& stream) const;
-private:
+protected:
 	const int _index;
 	const SymbolTable* _symbolTable;
+};
+
+// Array element
+class ArrayElementOperand : public MemoryOperand {
+public:
+	ArrayElementOperand(const int index, std::shared_ptr<RValue> elementIndex, const SymbolTable* symbolTable);
+	std::string toString(bool expanded = false) const;
+
+	bool operator==(ArrayElementOperand& other);
+
+	const std::shared_ptr<RValue> elementIndex() const;
+
+	// Generates i8080 code to save A reg to given place
+	void save(std::ostream& stream) const;
+	void load(std::ostream& stream) const;
+
+protected:
+	const std::shared_ptr<RValue> _elementIndex;
 };
 
 

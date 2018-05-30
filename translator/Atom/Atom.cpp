@@ -220,6 +220,24 @@ std::string RetAtom::toString() const
 	return "(RET, , , " + _value->toString() + ")";
 }
 
+void RetAtom::generate(std::ostream & stream) const
+{
+	stream << "; " << toString() << std::endl;
+	unsigned int offset = _table[_scope].offset;
+
+	_value->load(stream);
+
+	stream << "LXI H, " << offset << std::endl;
+	stream << "DAD SP" << std::endl;
+	stream << "MOV M, A" << std::endl;
+
+	for (unsigned int i = 0; i < _table.getLocalsCount(_scope) + _table.getArraysSize(_scope); ++i) {
+		stream << "POP B" << std::endl;
+	}
+
+	stream << "RET" << std::endl;
+}
+
 ParamAtom::ParamAtom(const std::shared_ptr<RValue> value, std::deque<std::shared_ptr<RValue>>& paramList) : _value(value), _paramList(paramList)
 {
 }

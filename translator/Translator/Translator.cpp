@@ -133,7 +133,7 @@ LexicalToken Translator::_getNextLexem()
 bool Translator::_takeTerm(LexemType type)
 {
 	if (_currentLexem->type() != type) {
-		throwSyntaxError("Excepted " + LexicalToken::lexemName(type) + ", got " + _currentLexem->toString());
+		throwSyntaxError("Expected " + LexicalToken::lexemName(type) + ", got " + _currentLexem->toString());
 		return false;
 	}
 	_getNextLexem();
@@ -288,6 +288,24 @@ std::shared_ptr<MemoryOperand> Translator::E1_(const Scope context, const std::s
 		generateAtom(std::make_unique<SimpleBinaryOpAtom>("ADD", s, std::make_shared<NumberOperand>(1), s), context);
 
 		return r;
+	}
+	else if (_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> key = E(context);
+
+		if (!key) {
+			throwSyntaxError("Can't parse index");
+		}
+
+		_takeTerm(LexemType::rbracket);
+
+		std::shared_ptr<MemoryOperand> arr = _symbolTable.checkArray(context, p);
+		if (!arr) {
+			throwSyntaxError(p + " is not an array.");
+		}
+
+		return std::make_shared<ArrayElementOperand>(arr->index(), key, &_symbolTable);
 	}
 
 	return _symbolTable.checkVar(context, p); // @TODO: replace with checkVar
@@ -626,6 +644,23 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 
 		_takeTerm(LexemType::semicolon);
 	}
+	else if (_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		int val = _currentLexem->value();
+
+		if (val <= 0) {
+			throwSyntaxError("Array size must be greater than 0");
+		}
+
+		_takeTerm(LexemType::num);
+		_takeTerm(LexemType::rbracket);
+
+		_symbolTable.insertArray(q, context, p, val);
+
+		DeclVarList_(context, p);
+		_takeTerm(LexemType::semicolon);
+	}
 	else {
 		_symbolTable.insertVar(q, context, p);
 		DeclVarList_(context, p);
@@ -670,12 +705,26 @@ void Translator::InitVar(const Scope context, SymbolTable::TableRecord::RecordTy
 		int val = _currentLexem->value();
 
 		if (_currentLexem->type() != LexemType::num && _currentLexem->type() != LexemType::chr) {
-			throwSyntaxError("Int or char excepted as init value.");
+			throwSyntaxError("Int or char expected as init value.");
 		}
 
 		_getNextLexem();
 
 		_symbolTable.insertVar(q, context, p, val);
+	}
+	else if(_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		int val = _currentLexem->value();
+
+		if (val <= 0) {
+			throwSyntaxError("Array size must be greater than 0");
+		}
+
+		_takeTerm(LexemType::num);
+		_takeTerm(LexemType::rbracket);
+
+		_symbolTable.insertArray(q, context, p, val);
 	}
 	else {
 		_symbolTable.insertVar(q, context, p);
@@ -816,6 +865,33 @@ void Translator::AssignOrCall_(const Scope context, const std::string & p)
 		std::shared_ptr<MemoryOperand> r = _symbolTable.checkVar(context, p);
 		generateAtom(std::make_unique<UnaryOpAtom>("MOV", q, r), context);
 	}
+	else if (_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		std::shared_ptr<RValue> index = E(context);
+
+		if (!index) {
+			throwSyntaxError("Can't parse array key.");
+		}
+
+		_takeTerm(LexemType::rbracket);
+
+		// Check is array
+		std::shared_ptr<MemoryOperand> arr = _symbolTable.checkArray(context, p);
+		if (!arr) {
+			throwSyntaxError(p + " is not array.");
+		}
+
+		_takeTerm(LexemType::opassign);
+
+		std::shared_ptr<RValue> value = E(context);
+		if (!value) {
+			throwSyntaxError("Can't parse value of assignment");
+		}
+
+		generateAtom(std::make_unique<UnaryOpAtom>("MOV", value, std::make_shared<ArrayElementOperand>(arr->index(), index, &_symbolTable)), context);
+
+	}
 	else if (_currentLexem->type() == LexemType::lpar) {
 		_getNextLexem();
 
@@ -834,7 +910,7 @@ void Translator::AssignOrCall_(const Scope context, const std::string & p)
 
 	}
 	else {
-		throwSyntaxError("Unexpected lexem, excepted ( or =");
+		throwSyntaxError("Unexpected lexem, expected ( or =");
 	}
 }
 
@@ -1057,7 +1133,7 @@ std::shared_ptr<LabelOperand> Translator::ACase(const Scope context, std::shared
 		return def;
 	}
 	else {
-		throwSyntaxError("Excepted case or default. ");
+		throwSyntaxError("Expected case or default. ");
 		return nullptr;
 	}
 }
@@ -1119,7 +1195,7 @@ void Translator::_generateFunctionCode(std::ostream & stream, unsigned int funct
 	stream << record->name << ": ";
 
 	stream << "LXI B, 0" << std::endl;
-	for (unsigned int i = 0; i < _symbolTable.getLocalsCount(function); ++i) {
+	for (unsigned int i = 0; i < _symbolTable.getLocalsCount(function) + _symbolTable.getArraysSize(function); ++i) {
 		stream << "PUSH B" << std::endl;
 	}
 

@@ -98,5 +98,64 @@ namespace tests
 
 			Assert::AreEqual("STA VAR0\n", stream.str().c_str());
 		}
+
+		TEST_METHOD(ArrayElementOperand__loadLocal) {
+			SymbolTable symbolTable;
+			symbolTable.insertFunc("f", SymbolTable::TableRecord::RecordType::integer, 0);
+			symbolTable.insertArray("a", 0, SymbolTable::TableRecord::RecordType::integer, 10);
+			symbolTable.calculateOffset();
+
+			std::shared_ptr<MemoryOperand> arrayOp = std::make_shared<ArrayElementOperand>(1, std::make_shared<NumberOperand>(3), &symbolTable);
+			std::ostringstream stream;
+			arrayOp->load(stream);
+
+			Assert::AreEqual("MVI A, 3\nLXI H, 0\nLXI D, 0\nMOV E, A\nADD E\nMOV E, A\nDAD SP\nDAD D\nMOV A, M\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(ArrayElementOperand__loadGlobal) {
+			SymbolTable symbolTable;
+			symbolTable.insertArray("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+
+			std::shared_ptr<MemoryOperand> arrayOp = std::make_shared<ArrayElementOperand>(0, std::make_shared<NumberOperand>(3), &symbolTable);
+			std::ostringstream stream;
+			arrayOp->load(stream);
+
+			Assert::AreEqual("MVI A, 3\nLXI H, ARR0\nLXI D, 0\nMOV E, A\nADD E\nMOV E, A\nDAD D\nMOV A, M\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(ArrayElementOperand__saveLocal) {
+			SymbolTable symbolTable;
+			symbolTable.insertFunc("f", SymbolTable::TableRecord::RecordType::integer, 0);
+			symbolTable.insertArray("a", 0, SymbolTable::TableRecord::RecordType::integer, 10);
+			symbolTable.calculateOffset();
+
+			std::shared_ptr<MemoryOperand> arrayOp = std::make_shared<ArrayElementOperand>(1, std::make_shared<NumberOperand>(3), &symbolTable);
+			std::ostringstream stream;
+			arrayOp->save(stream);
+
+			Assert::AreEqual("MOV C, A\nMVI A, 3\nLXI H, 0\nLXI D, 0\nMOV E, A\nADD E\nMOV E, A\nDAD SP\nDAD D\nMOV A, C\nMOV M, A\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(ArrayElementOperand__saveGlobal) {
+			SymbolTable symbolTable;
+			symbolTable.insertArray("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+
+		 	std::shared_ptr<MemoryOperand> arrayOp = std::make_shared<ArrayElementOperand>(0, std::make_shared<NumberOperand>(3), &symbolTable);
+			std::ostringstream stream;
+			arrayOp->save(stream);
+
+			Assert::AreEqual("MOV C, A\nMVI A, 3\nLXI H, ARR0\nLXI D, 0\nMOV E, A\nADD E\nMOV E, A\nDAD D\nMOV A, C\nMOV M, A\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(ArrayElementOperand__Init)
+		{
+			SymbolTable symbolTable;
+			symbolTable.insertArray("a", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+			symbolTable.insertArray("b", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 15);
+			auto key = symbolTable.insertVar("c", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
+
+			ArrayElementOperand arrOp(0, key, &symbolTable);
+			Assert::AreEqual("[ArrayElOp, 0[2], a]", arrOp.toString(true).c_str());
+		}
 	};
 }
