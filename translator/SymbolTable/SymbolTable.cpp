@@ -18,6 +18,22 @@ std::shared_ptr<MemoryOperand> SymbolTable::insertVar(const std::string & name, 
 	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
 }
 
+std::shared_ptr<MemoryOperand> SymbolTable::insertArray(const std::string & name, const Scope scope, const TableRecord::RecordType type, const unsigned int len)
+{
+	// Check if record exists in table
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].scope == scope) {
+			return nullptr;
+		}
+	}
+
+	// Record not found, insert
+	TableRecord record(name, TableRecord::RecordKind::array, type, len, 0, scope, 0);
+
+	_records.push_back(record);
+	return std::make_shared<MemoryOperand>(_records.size() - 1, this);
+}
+
 std::shared_ptr<MemoryOperand> SymbolTable::insertFunc(const std::string & name, const TableRecord::RecordType type, const int len)
 {
 	// Check if record exists in table
@@ -68,6 +84,29 @@ std::shared_ptr<MemoryOperand> SymbolTable::checkFunc(const std::string & name, 
 	}
 
 	return nullptr;
+}
+
+std::shared_ptr<MemoryOperand> SymbolTable::checkArray(const Scope scope, const std::string & name)
+{
+	// Find var in given scope
+	int globalScopedValue = -1;
+
+	for (unsigned int i = 0; i < _records.size(); ++i) {
+		if (_records[i].name == name && _records[i].scope == scope &&
+			_records[i].kind == SymbolTable::TableRecord::RecordKind::array) {
+			return std::make_shared<MemoryOperand>(i, this);
+		}
+		else if (_records[i].name == name && _records[i].scope == SymbolTable::GLOBAL_SCOPE
+			&& _records[i].kind == SymbolTable::TableRecord::RecordKind::array) {
+			globalScopedValue = i;
+		}
+	}
+
+	if (globalScopedValue == -1) {
+		return nullptr;
+	}
+
+	return std::make_shared<MemoryOperand>(globalScopedValue, this);
 }
 
 bool SymbolTable::changeArgsCount(const int index, const int len)
@@ -232,6 +271,7 @@ std::ostream & operator<<(std::ostream & stream, const SymbolTable & table)
 		switch (record.kind) {
 		case SymbolTable::TableRecord::RecordKind::func: stream << "func"; break;
 		case SymbolTable::TableRecord::RecordKind::var: stream << "var"; break;
+		case SymbolTable::TableRecord::RecordKind::array: stream << "array"; break;
 		case SymbolTable::TableRecord::RecordKind::unknown: stream << "unknown"; break;
 		}
 		stream << std::setw(1) << " ";

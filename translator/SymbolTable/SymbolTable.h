@@ -15,7 +15,7 @@ public:
 
 	// Single element of table
 	struct TableRecord {
-		enum class RecordKind { unknown, var, func };
+		enum class RecordKind { unknown, var, func, array };
 		enum class RecordType { unknown, integer, chr };
 
 		TableRecord(std::string& _name,
@@ -51,6 +51,10 @@ public:
 	std::shared_ptr<MemoryOperand> insertVar(const std::string& name, const Scope scope,
 		const TableRecord::RecordType type, const unsigned int init = 0);
 
+	// Inserts new array into the table. If array with given name and scope exists, returns nullptr
+	std::shared_ptr<MemoryOperand> insertArray(const std::string& name, const Scope scope,
+		const TableRecord::RecordType type, const unsigned int len);
+
 	// Inserts new function into the table. If var or function with given name exists, returns nullptr
 	std::shared_ptr<MemoryOperand> insertFunc(const std::string& name, const TableRecord::RecordType type, const int len);
 
@@ -59,6 +63,9 @@ public:
 
 	// Checks whether given name is function with given count of arguments
 	std::shared_ptr<MemoryOperand> checkFunc(const std::string& name, const int len);
+
+	// Find array in given scope. If there's no array, returns nullptr
+	std::shared_ptr<MemoryOperand> checkArray(const Scope scope, const std::string& name);
 
 	// Changes args count for function
 	bool changeArgsCount(const int index, const int len);

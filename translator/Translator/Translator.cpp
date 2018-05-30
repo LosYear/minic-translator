@@ -626,6 +626,23 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 
 		_takeTerm(LexemType::semicolon);
 	}
+	else if (_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		int val = _currentLexem->value();
+
+		if (val <= 0) {
+			throwSyntaxError("Array size must be greater than 0");
+		}
+
+		_takeTerm(LexemType::num);
+		_takeTerm(LexemType::rbracket);
+
+		_symbolTable.insertArray(q, context, p, val);
+
+		DeclVarList_(context, p);
+		_takeTerm(LexemType::semicolon);
+	}
 	else {
 		_symbolTable.insertVar(q, context, p);
 		DeclVarList_(context, p);
@@ -676,6 +693,20 @@ void Translator::InitVar(const Scope context, SymbolTable::TableRecord::RecordTy
 		_getNextLexem();
 
 		_symbolTable.insertVar(q, context, p, val);
+	}
+	else if(_currentLexem->type() == LexemType::lbracket) {
+		_getNextLexem();
+
+		int val = _currentLexem->value();
+
+		if (val <= 0) {
+			throwSyntaxError("Array size must be greater than 0");
+		}
+
+		_takeTerm(LexemType::num);
+		_takeTerm(LexemType::rbracket);
+
+		_symbolTable.insertArray(q, context, p, val);
 	}
 	else {
 		_symbolTable.insertVar(q, context, p);

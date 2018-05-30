@@ -41,6 +41,33 @@ namespace tests
 			Assert::IsTrue(nullptr != rep_op_otherScope);
 		}
 
+		TEST_METHOD(SymbolTable__InsertArray)
+		{
+			SymbolTable table;
+			std::shared_ptr<MemoryOperand> op0 = table.insertArray("First string", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 2);
+			std::shared_ptr<MemoryOperand> op1 = table.insertArray("Second string", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 15);
+			std::shared_ptr<MemoryOperand> op2 = table.insertArray("Third string", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 3);
+
+			Assert::IsTrue(MemoryOperand(0, &table) == *op0);
+			Assert::IsTrue(MemoryOperand(1, &table) == *op1);
+			Assert::IsTrue(MemoryOperand(2, &table) == *op2);
+		}
+
+		TEST_METHOD(SymbolTable__InserArray_Existing)
+		{
+			SymbolTable table;
+			std::string str = "repeating string";
+			table.insertArray("First string", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+			std::shared_ptr<MemoryOperand> op = table.insertArray(str, 5, SymbolTable::TableRecord::RecordType::integer, 10);
+			table.insertArray("Third string", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer, 10);
+
+			std::shared_ptr<MemoryOperand> rep_op = table.insertVar(str, 5, SymbolTable::TableRecord::RecordType::integer, 10);
+			std::shared_ptr<MemoryOperand> rep_op_otherScope = table.insertVar(str, 105, SymbolTable::TableRecord::RecordType::integer, 10);
+
+			Assert::IsTrue(nullptr == rep_op);
+			Assert::IsTrue(nullptr != rep_op_otherScope);
+		}
+
 		TEST_METHOD(SymbolTable__InsertFunc)
 		{
 			SymbolTable table;
@@ -158,6 +185,7 @@ namespace tests
 			SymbolTable symbolTable;
 			auto record = symbolTable.insertVar("var", 1, SymbolTable::TableRecord::RecordType::integer, 10);
 			auto record2 = symbolTable.insertFunc("func", SymbolTable::TableRecord::RecordType::integer, 0);
+			auto record3 = symbolTable.insertArray("array", 1, SymbolTable::TableRecord::RecordType::integer, 10);
 
 			std::ostringstream stream;
 			stream << symbolTable;
@@ -166,7 +194,8 @@ namespace tests
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
 				"0          var        var        integer    -1         10         1          0          \n" +
-				"1          func       func       integer    0          0          -1         0          \n";
+				"1          func       func       integer    0          0          -1         0          \n" + 
+				"2          array      array      integer    10         0          1          0          \n";
 
 			Assert::AreEqual(excepted.c_str(), stream.str().c_str());
 		}
