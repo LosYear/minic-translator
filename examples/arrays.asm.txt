@@ -1,0 +1,36 @@
+ORG 8000H
+ORG 0
+LXI H, 0
+SPHL
+CALL main
+END
+@MULT:
+; code for mult lib
+@PRINT:
+; code for mult lib
+main: LXI B, 0
+PUSH B
+PUSH B
+; (RET, , , '0')
+MVI A, 0
+LXI H, 56
+DAD SP
+MOV M, A
+POP B
+POP B
+RET
+f1: LXI B, 0
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+; (RET, , , '0')
+MVI A, 0
+LXI H, 60
+DAD SP
+MOV M, A
+POP B
+POP B
+POP B
+POP B
+RET

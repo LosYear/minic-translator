@@ -50,11 +50,11 @@ namespace Tests
 			std::string excepted = std::string("SYMBOL TABLE:\n") +
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
-				"0          main       func       integer    0          0          -1         10         \n" +
-				"1          a          var        integer    -1         0          0          6          \n" +
-				"2          b          array      integer    10         0          0          0          \n" +
-				"3          c          var        integer    -1         3          0          4          \n" +
-				"4          k          array      integer    15         0          0          0          \n";
+				"0          main       func       integer    0          0          -1         56         \n" +
+				"1          a          var        integer    -1         0          0          2          \n" +
+				"2          b          array      integer    10         0          0          4          \n" +
+				"3          c          var        integer    -1         3          0          0          \n" +
+				"4          k          array      integer    15         0          0          24         \n";
 
 			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}

@@ -90,6 +90,9 @@ public:
 	friend std::ostream& operator<<(std::ostream& stream, const SymbolTable& table);
 private:
 	std::vector<TableRecord> _records;
+
+	// Sums len of arrays in given scope
+	unsigned int _getArraysSize(const Scope scope);
 };
 
 std::ostream& operator<<(std::ostream& stream, const SymbolTable& table);

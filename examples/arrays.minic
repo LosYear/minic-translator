@@ -1,0 +1,1 @@
+int main(){int a, b[10], c = 3; int k[15];} int f1(int p1, int p2){int a, b[10], c; int k[13], d, e;}

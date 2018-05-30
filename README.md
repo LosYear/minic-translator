@@ -1,1 +1,3 @@
-minic-translator
+MiniC Translator
+
+При наличии массивов в scope, массивы кладутся на стек раньше переменных для удобства подсчета offset 

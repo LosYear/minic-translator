@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include "Translator\Translator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -87,7 +88,7 @@ namespace tests
 		TEST_METHOD(SymbolTable__CheckVar_localScope)
 		{
 			SymbolTable table;
-			std::shared_ptr<MemoryOperand> global = table.insertVar("var1", SymbolTable::GLOBAL_SCOPE , SymbolTable::TableRecord::RecordType::integer);
+			std::shared_ptr<MemoryOperand> global = table.insertVar("var1", SymbolTable::GLOBAL_SCOPE, SymbolTable::TableRecord::RecordType::integer);
 			std::shared_ptr<MemoryOperand> op0 = table.insertVar("var1", 10, SymbolTable::TableRecord::RecordType::integer);
 			std::shared_ptr<MemoryOperand> op1 = table.checkVar(10, "var1");
 
@@ -194,7 +195,7 @@ namespace tests
 				"----------\n" +
 				"code       name       kind       type       len        init       scope      offset     \n" +
 				"0          var        var        integer    -1         10         1          0          \n" +
-				"1          func       func       integer    0          0          -1         0          \n" + 
+				"1          func       func       integer    0          0          -1         0          \n" +
 				"2          array      array      integer    10         0          1          0          \n";
 
 			Assert::AreEqual(excepted.c_str(), stream.str().c_str());
@@ -211,6 +212,38 @@ namespace tests
 			table.generateGlobalsSection(stream);
 
 			Assert::AreEqual("var0: DB 10\nvar1: DB 0\nvar2: DB 0\n", stream.str().c_str());
+		}
+
+		TEST_METHOD(SymbolTable__offsetWithArrays)
+		{
+			std::istringstream stream("int main(){int a, b[10], c = 3; int k[15];} int f1(int p1, int p2){int a, b[10], c; int k[13], d, e;}");
+			Translator translator(stream);
+
+			bool translated = translator.translate();
+			Assert::IsTrue(translated);
+
+			std::ostringstream result;
+			translator.printSymbolTable(result);
+
+			std::string excepted = std::string("SYMBOL TABLE:\n") +
+				"----------\n" +
+				"code       name       kind       type       len        init       scope      offset     \n" +
+				"0          main       func       integer    0          0          -1         56         \n" +
+				"1          a          var        integer    -1         0          0          2          \n" +
+				"2          b          array      integer    10         0          0          4          \n" +
+				"3          c          var        integer    -1         3          0          0          \n" +
+				"4          k          array      integer    15         0          0          24         \n" +
+				"5          f1         func       integer    2          0          -1         60         \n" +
+				"6          p1         var        integer    -1         0          5          58         \n" +
+				"7          p2         var        integer    -1         0          5          56         \n" +
+				"8          a          var        integer    -1         0          5          6          \n" +
+				"9          b          array      integer    10         0          5          8          \n" +
+				"10         c          var        integer    -1         0          5          4          \n" +
+				"11         k          array      integer    13         0          5          28         \n" +
+				"12         d          var        integer    -1         0          5          2          \n" +
+				"13         e          var        integer    -1         0          5          0          \n";
+
+			Assert::AreEqual(excepted.c_str(), result.str().c_str());
 		}
 	};
 }
