@@ -1195,7 +1195,7 @@ void Translator::_generateFunctionCode(std::ostream & stream, unsigned int funct
 	stream << record->name << ": ";
 
 	stream << "LXI B, 0" << std::endl;
-	for (unsigned int i = 0; i < _symbolTable.getLocalsCount(function); ++i) {
+	for (unsigned int i = 0; i < _symbolTable.getLocalsCount(function) + _symbolTable.getArraysSize(function); ++i) {
 		stream << "PUSH B" << std::endl;
 	}
 

@@ -82,6 +82,9 @@ public:
 	// Generates global section with vars init
 	void generateGlobalsSection(std::ostream& stream) const;
 
+	// Sums len of arrays in given scope
+	unsigned int getArraysSize(const Scope scope) const;
+
 	// Returns names all of functions in string table
 	std::vector<std::string> functionNames() const;
 	std::vector<unsigned int> functionsIds() const;
@@ -90,9 +93,6 @@ public:
 	friend std::ostream& operator<<(std::ostream& stream, const SymbolTable& table);
 private:
 	std::vector<TableRecord> _records;
-
-	// Sums len of arrays in given scope
-	unsigned int _getArraysSize(const Scope scope);
 };
 
 std::ostream& operator<<(std::ostream& stream, const SymbolTable& table);

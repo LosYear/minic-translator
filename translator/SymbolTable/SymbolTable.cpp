@@ -151,7 +151,7 @@ void SymbolTable::calculateOffset()
 		if (it->kind == TableRecord::RecordKind::var && it->scope != SymbolTable::GLOBAL_SCOPE) {
 			unsigned int n = _records[it->scope].len;
 			unsigned int m = getLocalsCount(it->scope);
-			unsigned int arrays = _getArraysSize(it->scope);
+			unsigned int arrays = getArraysSize(it->scope);
 
 			unsigned int j = 1;
 
@@ -171,7 +171,7 @@ void SymbolTable::calculateOffset()
 		else if (it->kind == TableRecord::RecordKind::func) {
 			unsigned int n = _records[i].len;
 			unsigned int m = getLocalsCount(i);
-			unsigned int arrays = _getArraysSize(i);
+			unsigned int arrays = getArraysSize(i);
 			it->offset = 2 * (m + n + 1) + 2 * arrays;
 		}
 		else if (it->kind == TableRecord::RecordKind::array && it->scope != SymbolTable::GLOBAL_SCOPE) {
@@ -190,6 +190,9 @@ void SymbolTable::generateGlobalsSection(std::ostream & stream) const
 	for (unsigned int i = 0; i < _records.size(); ++i) {
 		if (_records[i].scope == SymbolTable::GLOBAL_SCOPE && _records[i].kind == SymbolTable::TableRecord::RecordKind::var) {
 			stream << "var" << i << ": DB " << _records[i].init << std::endl;
+		}
+		else if (_records[i].scope == SymbolTable::GLOBAL_SCOPE && _records[i].kind == SymbolTable::TableRecord::RecordKind::array) {
+			stream << "ARR" << i << ": DS " << _records[i].len * 2 << std::endl;
 		}
 	}
 }
@@ -225,7 +228,7 @@ const SymbolTable::TableRecord & SymbolTable::operator[](const int index) const
 	return _records[index];
 }
 
-unsigned int SymbolTable::_getArraysSize(const Scope scope)
+unsigned int SymbolTable::getArraysSize(const Scope scope) const
 {
 	unsigned int result = 0;
 

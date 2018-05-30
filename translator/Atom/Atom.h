@@ -176,24 +176,7 @@ public:
 	RetAtom(const std::shared_ptr<RValue> value, const Scope scope, const SymbolTable& table);
 	std::string toString() const;
 
-	void generate(std::ostream& stream) const
-	{
-		stream << "; " << toString() << std::endl;
-		unsigned int offset = _table[_scope].offset;
-
-		_value->load(stream);
-
-		stream << "LXI H, " << offset << std::endl;
-		stream << "DAD SP" << std::endl;
-		stream << "MOV M, A" << std::endl;
-
-		for (unsigned int i = 0; i < _table.getLocalsCount(_scope); ++i) {
-			stream << "POP B" << std::endl;
-		}
-
-		stream << "RET" << std::endl;
-	}
-
+	void generate(std::ostream& stream) const;
 private:
 	const std::shared_ptr<RValue> _value;
 	const Scope _scope;

@@ -1,0 +1,269 @@
+ORG 8000H
+ORG 0
+LXI H, 0
+SPHL
+CALL main
+END
+@MULT:
+; code for mult lib
+@PRINT:
+; code for mult lib
+main: LXI B, 0
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+PUSH B
+; (MOV, '0', , 1['0'])
+MVI A, 0
+MOV C, A
+MVI A, 0
+LXI H, 12
+LXI D, 0
+MOV E, A
+ADD E
+MOV E, A
+DAD SP
+DAD D
+MOV A, C
+MOV M, A
+; (MOV, '1', , 1['1'])
+MVI A, 1
+MOV C, A
+MVI A, 1
+LXI H, 12
+LXI D, 0
+MOV E, A
+ADD E
+MOV E, A
+DAD SP
+DAD D
+MOV A, C
+MOV M, A
+; (MOV, '2', , 2)
+MVI A, 2
+LXI H, 10
+DAD SP
+MOV M, A
+LBL0: ; (MOV, '1', , 3)
+MVI A, 1
+LXI H, 8
+DAD SP
+MOV M, A
+; (LT, 2, '10', lbl`1`)
+MVI A, 10
+MOV B, A
+LXI H, 10
+DAD SP
+MOV A, M
+CMP B
+JM LBL1
+; (MOV, '0', , 3)
+MVI A, 0
+LXI H, 8
+DAD SP
+MOV M, A
+LBL1: ; (EQ, 3, '0', lbl`4`)
+MVI A, 0
+MOV B, A
+LXI H, 8
+DAD SP
+MOV A, M
+CMP B
+JZ LBL4
+; (JMP, , , lbl`3`)
+JMP LBL3
+LBL2: ; (ADD, 2, '1', 2)
+MVI A, 1
+MOV B, A
+LXI H, 10
+DAD SP
+MOV A, M
+ADD B
+LXI H, 10
+DAD SP
+MOV M, A
+; (JMP, , , lbl`0`)
+JMP LBL0
+LBL3: ; (SUB, 2, '1', 4)
+MVI A, 1
+MOV B, A
+LXI H, 10
+DAD SP
+MOV A, M
+SUB B
+LXI H, 6
+DAD SP
+MOV M, A
+; (SUB, 2, '2', 5)
+MVI A, 2
+MOV B, A
+LXI H, 10
+DAD SP
+MOV A, M
+SUB B
+LXI H, 4
+DAD SP
+MOV M, A
+; (ADD, 1[4], 1[5], 6)
+LXI H, 4
+DAD SP
+MOV A, M
+LXI H, 12
+LXI D, 0
+MOV E, A
+ADD E
+MOV E, A
+DAD SP
+DAD D
+MOV A, M
+MOV B, A
+LXI H, 6
+DAD SP
+MOV A, M
+LXI H, 12
+LXI D, 0
+MOV E, A
+ADD E
+MOV E, A
+DAD SP
+DAD D
+MOV A, M
+ADD B
+LXI H, 2
+DAD SP
+MOV M, A
+; (MOV, 6, , 1[2])
+LXI H, 2
+DAD SP
+MOV A, M
+MOV C, A
+LXI H, 10
+DAD SP
+MOV A, M
+LXI H, 12
+LXI D, 0
+MOV E, A
+ADD E
+MOV E, A
+DAD SP
+DAD D
+MOV A, C
+MOV M, A
+; (JMP, , , lbl`2`)
+JMP LBL2
+LBL4: ; (MOV, '0', , 2)
+MVI A, 0
+LXI H, 10
+DAD SP
+MOV M, A
+LBL5: ; (MOV, '1', , 7)
+MVI A, 1
+LXI H, 0
+DAD SP
+MOV M, A
+; (LT, 2, '10', lbl`6`)
+MVI A, 10
+MOV B, A
+LXI H, 10
+DAD SP
+MOV A, M
+CMP B
+JM LBL6
+; (MOV, '0', , 7)
+MVI A, 0
+LXI H, 0
+DAD SP
+MOV M, A
+LBL6: ; (EQ, 7, '0', lbl`9`)
+MVI A, 0
+MOV B, A
+LXI H, 0
+DAD SP
+MOV A, M
+CMP B
+JZ LBL9
+; (JMP, , , lbl`8`)
+JMP LBL8
+LBL7: ; (ADD, 2, '1', 2)
+MVI A, 1
+MOV B, A
+LXI H, 10
+DAD SP
+MOV A, M
+ADD B
+LXI H, 10
+DAD SP
+MOV M, A
+; (JMP, , , lbl`5`)
+JMP LBL5
+LBL8: ; (OUT, , , 1[2])
+LXI H, 10
+DAD SP
+MOV A, M
+LXI H, 12
+LXI D, 0
+MOV E, A
+ADD E
+MOV E, A
+DAD SP
+DAD D
+MOV A, M
+OUT 1
+; (JMP, , , lbl`7`)
+JMP LBL7
+LBL9: ; (RET, , , '0')
+MVI A, 0
+LXI H, 34
+DAD SP
+MOV M, A
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+RET
+; (RET, , , '0')
+MVI A, 0
+LXI H, 34
+DAD SP
+MOV M, A
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+POP B
+RET
