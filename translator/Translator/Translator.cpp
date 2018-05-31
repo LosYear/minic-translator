@@ -638,7 +638,10 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 
 		_takeTerm(LexemType::num);
 
-		_symbolTable.insertVar(q, context, p, val);
+		std::shared_ptr<MemoryOperand> var = _symbolTable.insertVar(q, context, p, val);
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 
 		DeclVarList_(context, p);
 
@@ -656,13 +659,20 @@ void Translator::DeclareStmt_(const Scope context, SymbolTable::TableRecord::Rec
 		_takeTerm(LexemType::num);
 		_takeTerm(LexemType::rbracket);
 
-		_symbolTable.insertArray(q, context, p, val);
+		std::shared_ptr<MemoryOperand> var = _symbolTable.insertArray(q, context, p, val);
+
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 
 		DeclVarList_(context, p);
 		_takeTerm(LexemType::semicolon);
 	}
 	else {
-		_symbolTable.insertVar(q, context, p);
+		std::shared_ptr<MemoryOperand> var = _symbolTable.insertVar(q, context, p);
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 		DeclVarList_(context, p);
 		_takeTerm(LexemType::semicolon);
 	}
@@ -710,7 +720,11 @@ void Translator::InitVar(const Scope context, SymbolTable::TableRecord::RecordTy
 
 		_getNextLexem();
 
-		_symbolTable.insertVar(q, context, p, val);
+		std::shared_ptr<MemoryOperand> var = _symbolTable.insertVar(q, context, p, val);
+
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 	}
 	else if(_currentLexem->type() == LexemType::lbracket) {
 		_getNextLexem();
@@ -724,10 +738,17 @@ void Translator::InitVar(const Scope context, SymbolTable::TableRecord::RecordTy
 		_takeTerm(LexemType::num);
 		_takeTerm(LexemType::rbracket);
 
-		_symbolTable.insertArray(q, context, p, val);
+		std::shared_ptr<MemoryOperand> var = _symbolTable.insertArray(q, context, p, val);
+
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 	}
 	else {
-		_symbolTable.insertVar(q, context, p);
+		std::shared_ptr<MemoryOperand> var = _symbolTable.insertVar(q, context, p);
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 	}
 }
 
@@ -742,7 +763,11 @@ unsigned int Translator::ParamList(const Scope context)
 	const std::string name = _currentLexem->str();
 	_takeTerm(LexemType::id);
 
-	_symbolTable.insertVar(name, context, q);
+	std::shared_ptr<MemoryOperand> var = _symbolTable.insertVar(name, context, q);
+
+	if (!var) {
+		throwSyntaxError("Variable with given name is already defined in this scope");
+	}
 
 	return ParamList_(context) + 1;
 }
@@ -761,7 +786,10 @@ unsigned int Translator::ParamList_(const Scope context)
 		const std::string name = _currentLexem->str();
 		_takeTerm(LexemType::id);
 
-		_symbolTable.insertVar(name, context, q);
+		std::shared_ptr<MemoryOperand> var =_symbolTable.insertVar(name, context, q);
+		if (!var) {
+			throwSyntaxError("Variable with given name is already defined in this scope");
+		}
 
 		return ParamList_(context) + 1;
 	}
